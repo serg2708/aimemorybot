@@ -2,14 +2,15 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Providers } from "@/components/providers";
 
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://chat.vercel.ai"),
-  title: "Next.js Chatbot Template",
-  description: "Next.js chatbot template using the AI SDK.",
+  metadataBase: new URL("https://aimemorybox.com"),
+  title: "AI Memory Box - Chat with Permanent Blockchain Memory",
+  description: "AI-powered chat with permanent memory stored on Autonomys blockchain. Your conversations, encrypted and preserved forever.",
 };
 
 export const viewport = {
@@ -72,15 +73,10 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          disableTransitionOnChange
-          enableSystem
-        >
+        <Providers>
           <Toaster position="top-center" />
           <SessionProvider>{children}</SessionProvider>
-        </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );
