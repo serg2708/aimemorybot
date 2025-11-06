@@ -294,9 +294,9 @@ export default function PricingPage() {
               What payment methods do you accept?
             </summary>
             <p className="mt-4 text-gray-600 dark:text-gray-400">
-              We accept AI3 tokens only. You can pay with AI3 on multiple chains including
-              Ethereum, Polygon, Arbitrum, Base, and Optimism. AI3 is our native utility token
-              designed specifically for AI services.
+              We accept AI3 tokens only on Autonomys Network. AI3 is the native utility token
+              of the Autonomys ecosystem, designed specifically for AI services. You can pay
+              using Autonomys Auto EVM (EVM-compatible chain).
             </p>
           </details>
 
