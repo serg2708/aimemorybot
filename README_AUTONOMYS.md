@@ -1,13 +1,13 @@
 # AI Memory Box - Autonomys Integration
 
-Complete guide for AI Memory Box with blockchain-powered permanent storage.
+Complete guide for AI Memory Box with blockchain-powered permanent storage and AI3 token payments.
 
 ## 🚀 Features
 
 - **Permanent Blockchain Storage**: Chat history stored on Autonomys DSN
 - **End-to-End Encryption**: All conversations encrypted with your wallet
 - **Multi-Chain Support**: Ethereum, Polygon, Arbitrum, Base, Optimism
-- **Crypto Payments**: Subscribe with ETH, USDC, or USDT
+- **AI3 Token Payments**: Pay for subscriptions with AI3 tokens only
 - **Web3 Wallets**: Support for MetaMask, Coinbase Wallet, WalletConnect, and Polkadot wallets
 - **Subscription Tiers**: Free, Basic, Pro, and Unlimited plans
 
@@ -54,7 +54,7 @@ BLOB_READ_WRITE_TOKEN=your_blob_token
 REDIS_URL=your_redis_url
 ```
 
-#### Optional Autonomys Variables:
+#### Optional Autonomys & AI3 Variables:
 
 ```env
 # Autonomys Configuration (defaults provided)
@@ -65,6 +65,15 @@ NEXT_PUBLIC_AUTONOMYS_API_KEY=your_autodrive_api_key
 # Smart Contract Addresses (if you deployed contracts)
 NEXT_PUBLIC_SUBSCRIPTION_CONTRACT_MAINNET=0x...
 NEXT_PUBLIC_SUBSCRIPTION_CONTRACT_POLYGON=0x...
+
+# AI3 Token Addresses (for payments)
+NEXT_PUBLIC_AI3_TOKEN_MAINNET=0x...
+NEXT_PUBLIC_AI3_TOKEN_POLYGON=0x...
+NEXT_PUBLIC_AI3_TOKEN_ARBITRUM=0x...
+NEXT_PUBLIC_AI3_TOKEN_BASE=0x...
+NEXT_PUBLIC_AI3_TOKEN_OPTIMISM=0x...
+
+# Payment Recipient (Treasury for AI3 tokens)
 NEXT_PUBLIC_PAYMENT_RECIPIENT=0x...
 ```
 

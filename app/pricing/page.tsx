@@ -1,6 +1,6 @@
 /**
  * Pricing page
- * Displays subscription plans with crypto payment options
+ * Displays subscription plans with AI3 token payments
  */
 
 'use client';
@@ -14,15 +14,15 @@ import {
   PLAN_PRICES,
   PLAN_FEATURES,
   getPlanName,
+  calculatePriceInAI3,
 } from '@/lib/contract';
 import { useSubscribe } from '@/lib/subscription';
-import { calculatePaymentAmount, formatPaymentAmount, type PaymentMethod } from '@/lib/payment';
+import { calculatePaymentAmount, formatPaymentAmount } from '@/lib/payment';
 
 export default function PricingPage() {
   const { address, isConnected } = useAccount();
   const [duration, setDuration] = useState<'monthly' | 'yearly'>('monthly');
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('ETH');
 
   const { subscribe, isPending, isConfirming, isSuccess, error } = useSubscribe();
 
@@ -35,7 +35,7 @@ export default function PricingPage() {
     setSelectedPlan(plan);
 
     try {
-      const amount = calculatePaymentAmount(plan, duration, paymentMethod);
+      const amount = calculatePaymentAmount(plan, duration);
       await subscribe(plan, duration, amount);
     } catch (err) {
       console.error('Subscription failed:', err);
@@ -113,7 +113,10 @@ export default function PricingPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
           {plans.map((plan) => {
             const features = PLAN_FEATURES[plan];
-            const price = PLAN_PRICES[plan][duration];
+            const usdPrice = PLAN_PRICES[plan][duration];
+            const ai3Amount = plan !== SubscriptionPlan.FREE
+              ? formatPaymentAmount(calculatePriceInAI3(plan, duration))
+              : '0 AI3';
             const isPopular = plan === SubscriptionPlan.PRO;
 
             return (
@@ -136,10 +139,10 @@ export default function PricingPage() {
 
                 {/* Price */}
                 <div className="mb-6">
-                  <span className="text-4xl font-bold">${price}</span>
-                  <span className="text-gray-600 dark:text-gray-400">
-                    /{duration === 'monthly' ? 'mo' : 'yr'}
-                  </span>
+                  <div className="text-4xl font-bold text-blue-600">{ai3Amount}</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    ≈ ${usdPrice} USD / {duration === 'monthly' ? 'mo' : 'yr'}
+                  </div>
                 </div>
 
                 {/* Features */}
@@ -291,8 +294,9 @@ export default function PricingPage() {
               What payment methods do you accept?
             </summary>
             <p className="mt-4 text-gray-600 dark:text-gray-400">
-              We accept cryptocurrency payments (ETH, USDC, USDT) on multiple chains including
-              Ethereum, Polygon, Arbitrum, Base, and Optimism.
+              We accept AI3 tokens only. You can pay with AI3 on multiple chains including
+              Ethereum, Polygon, Arbitrum, Base, and Optimism. AI3 is our native utility token
+              designed specifically for AI services.
             </p>
           </details>
 

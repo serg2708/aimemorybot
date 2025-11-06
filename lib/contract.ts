@@ -267,30 +267,19 @@ export function parseSubscription(data: readonly [number, bigint, boolean]): Sub
 }
 
 /**
- * Calculate total price in wei (for ETH payments)
+ * Calculate total price in AI3 tokens
+ * AI3 token has 18 decimals like ETH
  */
-export function calculatePriceInWei(
+export function calculatePriceInAI3(
   plan: SubscriptionPlan,
   duration: 'monthly' | 'yearly'
 ): bigint {
   const priceUSD = getPlanPrice(plan, duration);
-  // In production, use a price oracle to get ETH/USD rate
-  // For now, assume 1 ETH = $2000 USD
-  const ethPrice = 2000;
-  const priceInEth = priceUSD / ethPrice;
-  return parseEther(priceInEth.toString());
-}
-
-/**
- * Calculate total price for stablecoins (USDC/USDT)
- */
-export function calculatePriceInStablecoin(
-  plan: SubscriptionPlan,
-  duration: 'monthly' | 'yearly'
-): bigint {
-  const priceUSD = getPlanPrice(plan, duration);
-  // Stablecoins typically have 6 decimals
-  return BigInt(Math.floor(priceUSD * 1_000_000));
+  // In production, use a price oracle to get AI3/USD rate
+  // For now, assume 1 AI3 = $0.10 USD (10 AI3 = $1)
+  const ai3Price = 0.10;
+  const priceInAI3 = priceUSD / ai3Price;
+  return parseEther(priceInAI3.toString());
 }
 
 /**

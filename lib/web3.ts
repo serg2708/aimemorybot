@@ -88,52 +88,44 @@ export const CONTRACT_ADDRESSES = {
 } as const;
 
 /**
- * Token addresses for payments
+ * Token addresses for payments - AI3 Token only
  */
 export const TOKEN_ADDRESSES = {
-  USDC: {
-    [mainnet.id]: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-    [polygon.id]: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
-    [arbitrum.id]: '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8',
-    [base.id]: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
-    [optimism.id]: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
-  },
-  USDT: {
-    [mainnet.id]: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-    [polygon.id]: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
-    [arbitrum.id]: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
-    [optimism.id]: '0x94b008aA00579c1307B0EF2c499aD98a8ce58e58',
+  AI3: {
+    [mainnet.id]: process.env.NEXT_PUBLIC_AI3_TOKEN_MAINNET || '',
+    [polygon.id]: process.env.NEXT_PUBLIC_AI3_TOKEN_POLYGON || '',
+    [arbitrum.id]: process.env.NEXT_PUBLIC_AI3_TOKEN_ARBITRUM || '',
+    [base.id]: process.env.NEXT_PUBLIC_AI3_TOKEN_BASE || '',
+    [optimism.id]: process.env.NEXT_PUBLIC_AI3_TOKEN_OPTIMISM || '',
   },
 } as const;
 
 /**
- * Get supported tokens for a chain
+ * Get supported tokens for a chain - AI3 only
  */
 export function getSupportedTokens(chainId: number): string[] {
-  const tokens: string[] = [];
+  const tokenAddress = TOKEN_ADDRESSES.AI3[chainId as keyof typeof TOKEN_ADDRESSES.AI3];
 
-  if (TOKEN_ADDRESSES.USDC[chainId as keyof typeof TOKEN_ADDRESSES.USDC]) {
-    tokens.push('USDC');
-  }
-  if (TOKEN_ADDRESSES.USDT[chainId as keyof typeof TOKEN_ADDRESSES.USDT]) {
-    tokens.push('USDT');
+  if (tokenAddress) {
+    return ['AI3'];
   }
 
-  // Native token is always supported
-  tokens.push('ETH');
-
-  return tokens;
+  return [];
 }
 
 /**
- * Get token address for a specific chain
+ * Get AI3 token address for a specific chain
  */
-export function getTokenAddress(
-  token: 'USDC' | 'USDT',
-  chainId: number
-): string | undefined {
-  const tokenAddresses = TOKEN_ADDRESSES[token] as Record<number, string>;
+export function getAI3TokenAddress(chainId: number): string | undefined {
+  const tokenAddresses = TOKEN_ADDRESSES.AI3 as Record<number, string>;
   return tokenAddresses[chainId];
+}
+
+/**
+ * Get token decimals for AI3 (18 decimals)
+ */
+export function getAI3Decimals(): number {
+  return 18;
 }
 
 /**

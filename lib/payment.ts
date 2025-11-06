@@ -1,24 +1,24 @@
 /**
  * Payment processing utilities
- * Handles crypto payments via AI3 or direct wallet transactions
+ * Handles AI3 token payments only
  */
 
 'use client';
 
 import { parseEther, type Address } from 'viem';
-import { useAccount, useBalance, useSendTransaction, useWaitForTransactionReceipt } from 'wagmi';
+import { useAccount, useBalance, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { useState } from 'react';
 import {
   SubscriptionPlan,
-  calculatePriceInWei,
-  calculatePriceInStablecoin
+  calculatePriceInAI3,
 } from './contract';
-import { getTokenAddress } from './web3';
+import { getAI3TokenAddress } from './web3';
+import { ERC20_ABI } from './contract';
 
 /**
- * Payment method types
+ * Payment method types - AI3 only
  */
-export type PaymentMethod = 'ETH' | 'USDC' | 'USDT';
+export type PaymentMethod = 'AI3';
 
 /**
  * Payment data structure
@@ -32,34 +32,35 @@ export interface PaymentData {
 }
 
 /**
- * Hook to handle crypto payments
+ * Hook to handle AI3 token payments
  */
 export function usePayment() {
   const { address, chainId } = useAccount();
-  const { sendTransaction, data: hash, isPending, error } = useSendTransaction();
+  const { writeContract, data: hash, isPending, error } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
   });
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
 
   const processPayment = async (data: PaymentData) => {
-    if (!address) {
+    if (!address || !chainId) {
       throw new Error('Wallet not connected');
+    }
+
+    const ai3TokenAddress = getAI3TokenAddress(chainId);
+    if (!ai3TokenAddress) {
+      throw new Error('AI3 token not available on this chain');
     }
 
     setPaymentData(data);
 
-    // For ETH payments, send directly
-    if (data.method === 'ETH') {
-      sendTransaction({
-        to: data.recipient,
-        value: data.amount,
-      });
-    } else {
-      // For ERC20 tokens (USDC/USDT), we need to use a different approach
-      // This would typically involve approving the token and then calling a contract
-      throw new Error('Token payments not yet implemented');
-    }
+    // Transfer AI3 tokens to recipient
+    writeContract({
+      address: ai3TokenAddress as `0x${string}`,
+      abi: ERC20_ABI,
+      functionName: 'transfer',
+      args: [data.recipient, data.amount],
+    });
   };
 
   return {
@@ -74,51 +75,35 @@ export function usePayment() {
 }
 
 /**
- * Hook to check user's balance
+ * Hook to check user's AI3 balance
  */
-export function useUserBalance(token: PaymentMethod = 'ETH') {
+export function useUserBalance() {
   const { address, chainId } = useAccount();
 
-  // For ETH
-  const { data: ethBalance, isLoading: ethLoading } = useBalance({
-    address,
-    query: {
-      enabled: token === 'ETH' && !!address,
-    },
-  });
+  const tokenAddress = chainId ? getAI3TokenAddress(chainId) : undefined;
 
-  // For ERC20 tokens
-  const tokenAddress = chainId && token !== 'ETH'
-    ? getTokenAddress(token, chainId)
-    : undefined;
-
-  const { data: tokenBalance, isLoading: tokenLoading } = useBalance({
+  const { data: ai3Balance, isLoading } = useBalance({
     address,
     token: tokenAddress as Address,
     query: {
-      enabled: token !== 'ETH' && !!address && !!tokenAddress,
+      enabled: !!address && !!tokenAddress,
     },
   });
 
   return {
-    balance: token === 'ETH' ? ethBalance : tokenBalance,
-    isLoading: token === 'ETH' ? ethLoading : tokenLoading,
+    balance: ai3Balance,
+    isLoading,
   };
 }
 
 /**
- * Calculate payment amount based on plan and method
+ * Calculate payment amount in AI3 tokens
  */
 export function calculatePaymentAmount(
   plan: SubscriptionPlan,
-  duration: 'monthly' | 'yearly',
-  method: PaymentMethod
+  duration: 'monthly' | 'yearly'
 ): bigint {
-  if (method === 'ETH') {
-    return calculatePriceInWei(plan, duration);
-  } else {
-    return calculatePriceInStablecoin(plan, duration);
-  }
+  return calculatePriceInAI3(plan, duration);
 }
 
 /**
@@ -133,17 +118,12 @@ export async function checkSufficientBalance(
 }
 
 /**
- * Format payment amount for display
+ * Format AI3 payment amount for display
  */
-export function formatPaymentAmount(amount: bigint, method: PaymentMethod): string {
-  if (method === 'ETH') {
-    const eth = Number(amount) / 1e18;
-    return `${eth.toFixed(6)} ETH`;
-  } else {
-    // USDC/USDT have 6 decimals
-    const usd = Number(amount) / 1e6;
-    return `$${usd.toFixed(2)} ${method}`;
-  }
+export function formatPaymentAmount(amount: bigint): string {
+  // AI3 has 18 decimals
+  const ai3 = Number(amount) / 1e18;
+  return `${ai3.toFixed(2)} AI3`;
 }
 
 /**
