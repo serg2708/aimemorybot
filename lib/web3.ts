@@ -1,12 +1,11 @@
 /**
  * Web3 configuration for RainbowKit and wagmi
- * Supports both EVM chains (for payments) and Polkadot/Substrate (for Autonomys)
+ * Autonomys Network only - for AI3 token payments and DSN storage
  */
 
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
-import { mainnet, polygon, arbitrum, base, optimism } from 'wagmi/chains';
 
-// Autonomys custom chain
+// Autonomys Network (Substrate-based, for DSN storage)
 export const autonomys = {
   id: 490000,
   name: 'Autonomys Network',
@@ -34,8 +33,36 @@ export const autonomys = {
   testnet: false,
 } as const;
 
+// Autonomys Auto EVM (EVM-compatible, for AI3 token payments)
+export const autonomysAutoEVM = {
+  id: 490001, // Replace with actual chain ID
+  name: 'Autonomys Auto EVM',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'AUTO',
+    symbol: 'AUTO',
+  },
+  rpcUrls: {
+    default: {
+      http: [process.env.NEXT_PUBLIC_AUTONOMYS_AUTO_EVM_RPC || 'https://auto-evm-rpc.autonomys.xyz'],
+      webSocket: [process.env.NEXT_PUBLIC_AUTONOMYS_AUTO_EVM_WS || 'wss://auto-evm-ws.autonomys.xyz'],
+    },
+    public: {
+      http: [process.env.NEXT_PUBLIC_AUTONOMYS_AUTO_EVM_RPC || 'https://auto-evm-rpc.autonomys.xyz'],
+      webSocket: [process.env.NEXT_PUBLIC_AUTONOMYS_AUTO_EVM_WS || 'wss://auto-evm-ws.autonomys.xyz'],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: 'Autonomys Auto EVM Explorer',
+      url: 'https://auto-evm-explorer.autonomys.xyz',
+    },
+  },
+  testnet: false,
+} as const;
+
 /**
- * Get RainbowKit/wagmi configuration
+ * Get RainbowKit/wagmi configuration - Autonomys Networks only
  */
 export const getWeb3Config = () => {
   const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
@@ -48,55 +75,48 @@ export const getWeb3Config = () => {
     appName: 'AI Memory Box',
     projectId: projectId || 'YOUR_PROJECT_ID', // Fallback for development
     chains: [
-      mainnet,
-      polygon,
-      arbitrum,
-      base,
-      optimism,
-      autonomys as any, // Type assertion needed for custom chain
+      autonomys as any, // Autonomys Network (Substrate)
+      autonomysAutoEVM as any, // Autonomys Auto EVM
     ],
     ssr: true, // Enable server-side rendering
   });
 };
 
 /**
- * Supported networks for different operations
+ * Supported networks - Autonomys only
  */
 export const NETWORKS = {
-  // For payments
-  payment: [mainnet, polygon, arbitrum, base, optimism],
-  // For Autonomys DSN
+  // For AI3 token payments
+  payment: [autonomysAutoEVM],
+  // For DSN storage
   storage: [autonomys],
+  // All supported networks
+  all: [autonomys, autonomysAutoEVM],
 } as const;
 
 /**
- * Contract addresses for different chains
+ * Contract addresses - Autonomys Networks only
  */
 export const CONTRACT_ADDRESSES = {
-  // Subscription contract on different chains
+  // Subscription contract on Autonomys Auto EVM
   subscription: {
-    [mainnet.id]: process.env.NEXT_PUBLIC_SUBSCRIPTION_CONTRACT_MAINNET || '',
-    [polygon.id]: process.env.NEXT_PUBLIC_SUBSCRIPTION_CONTRACT_POLYGON || '',
-    [arbitrum.id]: process.env.NEXT_PUBLIC_SUBSCRIPTION_CONTRACT_ARBITRUM || '',
-    [base.id]: process.env.NEXT_PUBLIC_SUBSCRIPTION_CONTRACT_BASE || '',
-    [optimism.id]: process.env.NEXT_PUBLIC_SUBSCRIPTION_CONTRACT_OPTIMISM || '',
+    [autonomysAutoEVM.id]: process.env.NEXT_PUBLIC_SUBSCRIPTION_CONTRACT_AUTO_EVM || '',
   },
-  // Autonomys-specific contracts
-  autonomys: {
-    storage: process.env.NEXT_PUBLIC_AUTONOMYS_STORAGE_CONTRACT || '',
+  // Storage contract on Autonomys Network
+  storage: {
+    [autonomys.id]: process.env.NEXT_PUBLIC_AUTONOMYS_STORAGE_CONTRACT || '',
   },
 } as const;
 
 /**
- * Token addresses for payments - AI3 Token only
+ * AI3 Token addresses - Autonomys Networks only
  */
 export const TOKEN_ADDRESSES = {
   AI3: {
-    [mainnet.id]: process.env.NEXT_PUBLIC_AI3_TOKEN_MAINNET || '',
-    [polygon.id]: process.env.NEXT_PUBLIC_AI3_TOKEN_POLYGON || '',
-    [arbitrum.id]: process.env.NEXT_PUBLIC_AI3_TOKEN_ARBITRUM || '',
-    [base.id]: process.env.NEXT_PUBLIC_AI3_TOKEN_BASE || '',
-    [optimism.id]: process.env.NEXT_PUBLIC_AI3_TOKEN_OPTIMISM || '',
+    // AI3 on Autonomys Network (Substrate)
+    [autonomys.id]: process.env.NEXT_PUBLIC_AI3_TOKEN_AUTONOMYS || '',
+    // AI3 on Autonomys Auto EVM
+    [autonomysAutoEVM.id]: process.env.NEXT_PUBLIC_AI3_TOKEN_AUTO_EVM || '',
   },
 } as const;
 
@@ -147,10 +167,10 @@ export function isSubscriptionSupported(chainId: number): boolean {
 }
 
 /**
- * Get chain name from chain ID
+ * Get chain name from chain ID - Autonomys only
  */
 export function getChainName(chainId: number): string {
-  const chains = [mainnet, polygon, arbitrum, base, optimism, autonomys];
+  const chains = [autonomys, autonomysAutoEVM];
   const chain = chains.find((c) => c.id === chainId);
   return chain?.name || 'Unknown';
 }

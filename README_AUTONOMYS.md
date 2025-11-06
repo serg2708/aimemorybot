@@ -1,15 +1,27 @@
 # AI Memory Box - Autonomys Integration
 
-Complete guide for AI Memory Box with blockchain-powered permanent storage and AI3 token payments.
+Complete guide for AI Memory Box with blockchain-powered permanent storage and AI3 token payments on Autonomys Network.
 
 ## 🚀 Features
 
-- **Permanent Blockchain Storage**: Chat history stored on Autonomys DSN
+- **Permanent Blockchain Storage**: Chat history stored on Autonomys DSN (Substrate network)
 - **End-to-End Encryption**: All conversations encrypted with your wallet
-- **Multi-Chain Support**: Ethereum, Polygon, Arbitrum, Base, Optimism
-- **AI3 Token Payments**: Pay for subscriptions with AI3 tokens only
+- **Autonomys Network Only**: Operates exclusively on Autonomys Network and Autonomys Auto EVM
+- **AI3 Token Payments**: Pay for subscriptions with AI3 tokens (native to Autonomys)
 - **Web3 Wallets**: Support for MetaMask, Coinbase Wallet, WalletConnect, and Polkadot wallets
 - **Subscription Tiers**: Free, Basic, Pro, and Unlimited plans
+
+## 🌐 Supported Networks
+
+1. **Autonomys Network** (Chain ID: 490000)
+   - Substrate-based blockchain
+   - Used for DSN storage
+   - WebSocket: wss://rpc-chronos.autonomys.xyz
+
+2. **Autonomys Auto EVM** (Chain ID: 490001)
+   - EVM-compatible chain
+   - Used for AI3 token payments and subscriptions
+   - RPC: https://auto-evm-rpc.autonomys.xyz
 
 ## 📋 Prerequisites
 
@@ -54,24 +66,26 @@ BLOB_READ_WRITE_TOKEN=your_blob_token
 REDIS_URL=your_redis_url
 ```
 
-#### Optional Autonomys & AI3 Variables:
+#### Autonomys & AI3 Configuration:
 
 ```env
-# Autonomys Configuration (defaults provided)
+# Autonomys Network (Substrate - for DSN storage)
 NEXT_PUBLIC_AUTONOMYS_RPC_URL=wss://rpc-chronos.autonomys.xyz
 NEXT_PUBLIC_AUTONOMYS_CHAIN_ID=490000
 NEXT_PUBLIC_AUTONOMYS_API_KEY=your_autodrive_api_key
 
-# Smart Contract Addresses (if you deployed contracts)
-NEXT_PUBLIC_SUBSCRIPTION_CONTRACT_MAINNET=0x...
-NEXT_PUBLIC_SUBSCRIPTION_CONTRACT_POLYGON=0x...
+# Autonomys Auto EVM (for AI3 payments)
+NEXT_PUBLIC_AUTONOMYS_AUTO_EVM_RPC=https://auto-evm-rpc.autonomys.xyz
+NEXT_PUBLIC_AUTONOMYS_AUTO_EVM_WS=wss://auto-evm-ws.autonomys.xyz
+NEXT_PUBLIC_AUTONOMYS_AUTO_EVM_CHAIN_ID=490001
 
-# AI3 Token Addresses (for payments)
-NEXT_PUBLIC_AI3_TOKEN_MAINNET=0x...
-NEXT_PUBLIC_AI3_TOKEN_POLYGON=0x...
-NEXT_PUBLIC_AI3_TOKEN_ARBITRUM=0x...
-NEXT_PUBLIC_AI3_TOKEN_BASE=0x...
-NEXT_PUBLIC_AI3_TOKEN_OPTIMISM=0x...
+# Smart Contract Addresses - Autonomys Only
+NEXT_PUBLIC_SUBSCRIPTION_CONTRACT_AUTO_EVM=0x...
+NEXT_PUBLIC_AUTONOMYS_STORAGE_CONTRACT=0x...
+
+# AI3 Token Addresses - Autonomys Only
+NEXT_PUBLIC_AI3_TOKEN_AUTONOMYS=0x...       # On Autonomys Network
+NEXT_PUBLIC_AI3_TOKEN_AUTO_EVM=0x...        # On Autonomys Auto EVM
 
 # Payment Recipient (Treasury for AI3 tokens)
 NEXT_PUBLIC_PAYMENT_RECIPIENT=0x...
