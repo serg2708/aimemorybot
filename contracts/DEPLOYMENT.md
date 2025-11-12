@@ -5,7 +5,7 @@ This guide explains how to deploy the Subscription smart contract to Autonomys A
 ## Contract Details
 
 - **File**: `contracts/Subscription.sol`
-- **Solidity Version**: ^0.8.20
+- **Solidity Version**: ^0.8.30
 - **License**: MIT
 - **Networks**:
   - Testnet (Chronos): Chain ID 8700
