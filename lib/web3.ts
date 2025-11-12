@@ -155,6 +155,13 @@ export function getAI3TokenAddress(chainId: number): string | undefined {
 }
 
 /**
+ * Get token name based on network (tAI3 for testnet, AI3 for mainnet)
+ */
+export function getAI3TokenName(): string {
+  return isTestnet ? 'tAI3' : 'AI3';
+}
+
+/**
  * Get token decimals for AI3 (18 decimals)
  */
 export function getAI3Decimals(): number {

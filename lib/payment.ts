@@ -12,7 +12,7 @@ import {
   SubscriptionPlan,
   calculatePriceInAI3,
 } from './contract';
-import { getAI3TokenAddress } from './web3';
+import { getAI3TokenAddress, getAI3TokenName } from './web3';
 import { ERC20_ABI } from './contract';
 
 /**
@@ -118,12 +118,13 @@ export async function checkSufficientBalance(
 }
 
 /**
- * Format AI3 payment amount for display
+ * Format AI3 payment amount for display (shows tAI3 for testnet, AI3 for mainnet)
  */
 export function formatPaymentAmount(amount: bigint): string {
   // AI3 has 18 decimals
   const ai3 = Number(amount) / 1e18;
-  return `${ai3.toFixed(2)} AI3`;
+  const tokenName = getAI3TokenName();
+  return `${ai3.toFixed(2)} ${tokenName}`;
 }
 
 /**
