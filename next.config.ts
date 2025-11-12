@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import webpack from "webpack";
 
 const nextConfig: NextConfig = {
   experimental: {
@@ -16,12 +17,26 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
     // Ignore React Native dependencies for web builds
+    if (!isServer) {
+      config.plugins.push(
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^@react-native-async-storage\/async-storage$/,
+        }),
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^react-native$/,
+        })
+      );
+    }
+
+    // Alias React Native modules to empty modules
     config.resolve.alias = {
       ...config.resolve.alias,
       '@react-native-async-storage/async-storage': false,
       'react-native': false,
+      'react-native-device-info': false,
+      'react-native-randombytes': false,
     };
 
     // Fallback for Node.js modules not available in browser
