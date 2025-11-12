@@ -7,21 +7,21 @@ import { getDefaultConfig } from '@rainbow-me/rainbowkit';
 import { defineChain } from 'viem';
 
 // Autonomys Auto EVM (EVM-compatible, for AI3 token payments)
-// Use NEXT_PUBLIC_AUTONOMYS_NETWORK=mainnet or testnet (default: mainnet)
+// Use NEXT_PUBLIC_AUTONOMYS_NETWORK=mainnet or testnet (default: testnet)
 const isTestnet = process.env.NEXT_PUBLIC_AUTONOMYS_NETWORK === 'testnet';
 
 export const autonomysAutoEVM = defineChain({
-  id: 490001,
-  name: isTestnet ? 'Autonomys Auto EVM Testnet' : 'Autonomys Auto EVM Mainnet',
+  id: isTestnet ? 8700 : 490001, // Testnet (Chronos): 8700, Mainnet: 490001
+  name: isTestnet ? 'AutoEVM Testnet (Chronos)' : 'AutoEVM Mainnet',
   nativeCurrency: {
     decimals: 18,
-    name: 'AUTO',
-    symbol: 'AUTO',
+    name: isTestnet ? 'tAI3' : 'AI3',
+    symbol: isTestnet ? 'tAI3' : 'AI3',
   },
   rpcUrls: {
     default: {
       http: [isTestnet
-        ? 'https://auto-evm.chronos.autonomys.xyz'
+        ? 'https://rpc-0.chronos.autonomys.xyz'
         : 'https://auto-evm.mainnet.autonomys.xyz'],
       webSocket: [isTestnet
         ? 'wss://auto-evm.chronos.autonomys.xyz/ws'
@@ -30,9 +30,9 @@ export const autonomysAutoEVM = defineChain({
   },
   blockExplorers: {
     default: {
-      name: 'Autonomys Auto EVM Explorer',
+      name: isTestnet ? 'AutoEVM Explorer (Chronos)' : 'AutoEVM Explorer (Mainnet)',
       url: isTestnet
-        ? 'https://explorer.chronos.autonomys.xyz'
+        ? 'https://explorer.auto-evm.chronos.autonomys.xyz'
         : 'https://explorer.mainnet.autonomys.xyz',
     },
   },
