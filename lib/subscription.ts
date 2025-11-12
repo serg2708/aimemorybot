@@ -67,7 +67,7 @@ export function useSubscription() {
  * Hook to subscribe to a plan
  */
 export function useSubscribe() {
-  const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const { writeContractAsync, data: hash, isPending, error } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
   });
@@ -90,7 +90,7 @@ export function useSubscribe() {
       ? BigInt(30 * 24 * 60 * 60)
       : BigInt(365 * 24 * 60 * 60);
 
-    writeContract({
+    return writeContractAsync({
       address: contractAddress as `0x${string}`,
       abi: SUBSCRIPTION_ABI,
       functionName: 'subscribe',
@@ -113,7 +113,7 @@ export function useSubscribe() {
  * Hook to extend subscription
  */
 export function useExtendSubscription() {
-  const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const { writeContractAsync, data: hash, isPending, error } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
   });
@@ -132,7 +132,7 @@ export function useExtendSubscription() {
       ? BigInt(30 * 24 * 60 * 60)
       : BigInt(365 * 24 * 60 * 60);
 
-    writeContract({
+    return writeContractAsync({
       address: contractAddress as `0x${string}`,
       abi: SUBSCRIPTION_ABI,
       functionName: 'extendSubscription',
@@ -155,7 +155,7 @@ export function useExtendSubscription() {
  * Hook to cancel subscription
  */
 export function useCancelSubscription() {
-  const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const { writeContractAsync, data: hash, isPending, error } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
   });
@@ -170,7 +170,7 @@ export function useCancelSubscription() {
       throw new Error('Subscription contract not available on this chain');
     }
 
-    writeContract({
+    return writeContractAsync({
       address: contractAddress as `0x${string}`,
       abi: SUBSCRIPTION_ABI,
       functionName: 'cancelSubscription',
