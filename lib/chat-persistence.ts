@@ -8,6 +8,7 @@
 import { uploadToAutoDrive, downloadFromAutoDrive } from './auto-drive';
 import { notifyChatSaved, notifyChatLoaded, notifyError } from './notifications';
 import { retryDSNOperation, handleError } from './error-handling';
+import { encryptData, decryptData, isEncryptionAvailable } from './encryption';
 
 /**
  * Chat message interface
@@ -138,7 +139,18 @@ export async function saveChatToDSN(
     }
 
     // Prepare data
-    const data = JSON.stringify(chat);
+    let data = JSON.stringify(chat);
+
+    // Encrypt data if encryption is available and address is provided
+    if (isEncryptionAvailable() && address) {
+      const encrypted = await encryptData(data, address);
+      if (encrypted) {
+        data = encrypted;
+        console.log('Chat encrypted before upload to DSN');
+      } else {
+        console.warn('Encryption failed, uploading unencrypted');
+      }
+    }
 
     // Upload to AutoDrive
     const cid = await uploadToAutoDrive(data, {
@@ -173,11 +185,27 @@ export async function saveChatToDSN(
 /**
  * Load chat from AutoDrive DSN by CID
  */
-export async function loadChatFromDSN(cid: string): Promise<ChatSession | null> {
+export async function loadChatFromDSN(
+  cid: string,
+  address?: string
+): Promise<ChatSession | null> {
   try {
-    const data = await downloadFromAutoDrive(cid);
+    let data = await downloadFromAutoDrive(cid);
     if (!data) {
       throw new Error('Failed to download from DSN');
+    }
+
+    // Try to decrypt if address is provided
+    if (isEncryptionAvailable() && address) {
+      try {
+        const decrypted = await decryptData(data, address);
+        if (decrypted) {
+          data = decrypted;
+          console.log('Chat decrypted after download from DSN');
+        }
+      } catch (decryptError) {
+        console.warn('Decryption failed, assuming unencrypted data');
+      }
     }
 
     const chat: ChatSession = JSON.parse(data);
