@@ -1,220 +1,73 @@
 /**
- * Pricing page
- * Displays subscription plans with AI3 token payments
+ * Home page - Landing page
+ * Main landing page with hero section and CTA
  */
 
 'use client';
 
-import { useState } from 'react';
 import { useAccount } from 'wagmi';
 import { WalletConnect } from '@/components/wallet-connect';
-import { SubscriptionCard } from '@/components/subscription-badge';
-import {
-  SubscriptionPlan,
-  PLAN_PRICES,
-  PLAN_FEATURES,
-  getPlanName,
-  calculatePriceInAI3,
-} from '@/lib/contract';
-import { useSubscribe } from '@/lib/subscription';
-import { calculatePaymentAmount, formatPaymentAmount } from '@/lib/payment';
+import Link from 'next/link';
 
-export default function PricingPage() {
-  const { address, isConnected } = useAccount();
-  const [duration, setDuration] = useState<'monthly' | 'yearly'>('monthly');
-  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
-
-  const { subscribe, isPending, isConfirming, isSuccess, error } = useSubscribe();
-
-  const handleSubscribe = async (plan: SubscriptionPlan) => {
-    if (!isConnected) {
-      alert('Please connect your wallet first');
-      return;
-    }
-
-    setSelectedPlan(plan);
-
-    try {
-      const amount = calculatePaymentAmount(plan, duration);
-      await subscribe(plan, duration, amount);
-    } catch (err) {
-      console.error('Subscription failed:', err);
-      alert('Subscription failed. Please try again.');
-    }
-  };
-
-  const plans = [
-    SubscriptionPlan.FREE,
-    SubscriptionPlan.BASIC,
-    SubscriptionPlan.PRO,
-    SubscriptionPlan.UNLIMITED,
-  ];
+export default function HomePage() {
+  const { isConnected } = useAccount();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center">
-          <a href="/" className="text-2xl font-bold">
-            AI Memory Box
-          </a>
+          <div className="text-2xl font-bold">AI Memory Box</div>
           <div className="flex gap-4 items-center">
-            <a href="/chat" className="text-sm font-medium hover:underline">
-              Start Chatting
-            </a>
+            <Link href="/pricing" className="text-sm font-medium hover:underline">
+              Pricing
+            </Link>
+            <Link href="/dashboard" className="text-sm font-medium hover:underline">
+              Dashboard
+            </Link>
             <WalletConnect />
           </div>
         </div>
       </div>
 
       {/* Hero Section */}
-      <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-5xl font-bold mb-4">
-          Choose Your <span className="text-blue-600">Memory Plan</span>
+      <div className="container mx-auto px-4 py-24 text-center">
+        <h1 className="text-6xl md:text-7xl font-bold mb-6">
+          AI Chat with
+          <br />
+          <span className="text-blue-600">Permanent Memory</span>
         </h1>
-        <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
-          Permanent blockchain storage for your AI conversations
+        <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 mb-12 max-w-3xl mx-auto">
+          Your conversations stored forever on the blockchain. Encrypted, secure, and only accessible by you.
         </p>
 
-        {/* Duration Toggle */}
-        <div className="inline-flex rounded-lg border border-gray-300 dark:border-gray-700 p-1 mb-12">
-          <button
-            onClick={() => setDuration('monthly')}
-            className={`px-6 py-2 rounded-md font-medium transition-colors ${
-              duration === 'monthly'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-600 dark:text-gray-400'
-            }`}
+        <div className="flex gap-4 justify-center flex-wrap">
+          <Link
+            href="/chat"
+            className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold rounded-lg transition-colors"
           >
-            Monthly
-          </button>
-          <button
-            onClick={() => setDuration('yearly')}
-            className={`px-6 py-2 rounded-md font-medium transition-colors ${
-              duration === 'yearly'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-600 dark:text-gray-400'
-            }`}
+            Start Chatting Free
+          </Link>
+          <Link
+            href="/pricing"
+            className="px-8 py-4 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-lg font-semibold rounded-lg transition-colors"
           >
-            Yearly
-            <span className="ml-2 text-xs bg-green-500 text-white px-2 py-0.5 rounded">
-              Save 17%
-            </span>
-          </button>
+            View Plans
+          </Link>
         </div>
       </div>
 
-      {/* Current Subscription */}
-      {isConnected && address && (
-        <div className="container mx-auto px-4 mb-8">
-          <div className="max-w-2xl mx-auto">
-            <SubscriptionCard />
-          </div>
-        </div>
-      )}
-
-      {/* Pricing Cards */}
-      <div className="container mx-auto px-4 pb-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
-          {plans.map((plan) => {
-            const features = PLAN_FEATURES[plan];
-            const usdPrice = PLAN_PRICES[plan][duration];
-            const ai3Amount = plan !== SubscriptionPlan.FREE
-              ? formatPaymentAmount(calculatePriceInAI3(plan, duration))
-              : '0 AI3';
-            const isPopular = plan === SubscriptionPlan.PRO;
-
-            return (
-              <div
-                key={plan}
-                className={`relative p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg ${
-                  isPopular
-                    ? 'ring-2 ring-blue-600 scale-105'
-                    : 'border border-gray-200 dark:border-gray-700'
-                }`}
-              >
-                {isPopular && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-blue-600 text-white text-sm font-semibold rounded-full">
-                    Most Popular
-                  </div>
-                )}
-
-                {/* Plan Name */}
-                <h3 className="text-2xl font-bold mb-2">{features.name}</h3>
-
-                {/* Price */}
-                <div className="mb-6">
-                  <div className="text-4xl font-bold text-blue-600">{ai3Amount}</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    ≈ ${usdPrice} USD / {duration === 'monthly' ? 'mo' : 'yr'}
-                  </div>
-                </div>
-
-                {/* Features */}
-                <ul className="space-y-3 mb-8">
-                  <li className="flex items-start gap-2">
-                    <span className="text-green-500 mt-1">✓</span>
-                    <span className="text-sm">
-                      {features.messages === Infinity
-                        ? 'Unlimited messages'
-                        : `${features.messages} messages/day`}
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-green-500 mt-1">✓</span>
-                    <span className="text-sm">{features.storage} storage</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-green-500 mt-1">✓</span>
-                    <span className="text-sm">{features.history} history</span>
-                  </li>
-                  {features.models.map((model, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <span className="text-green-500 mt-1">✓</span>
-                      <span className="text-sm">{model}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                {/* CTA Button */}
-                {plan === SubscriptionPlan.FREE ? (
-                  <a
-                    href="/chat"
-                    className="block w-full py-3 px-6 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-center rounded-lg font-semibold transition-colors"
-                  >
-                    Start Free
-                  </a>
-                ) : (
-                  <button
-                    onClick={() => handleSubscribe(plan)}
-                    disabled={!isConnected || isPending || isConfirming}
-                    className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors ${
-                      isPopular
-                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                        : 'bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900'
-                    } disabled:opacity-50 disabled:cursor-not-allowed`}
-                  >
-                    {!isConnected
-                      ? 'Connect Wallet'
-                      : isPending || isConfirming
-                      ? 'Processing...'
-                      : 'Subscribe'}
-                  </button>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Features Comparison */}
-      <div className="container mx-auto px-4 py-16 bg-gray-50 dark:bg-gray-900">
-        <h2 className="text-3xl font-bold text-center mb-12">All Plans Include</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+      {/* Features Section */}
+      <div className="container mx-auto px-4 py-24">
+        <h2 className="text-4xl font-bold text-center mb-16">
+          Why AI Memory Box?
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-6xl mx-auto">
+          {/* Feature 1 */}
           <div className="text-center">
-            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-6">
               <svg
-                className="w-8 h-8 text-blue-600"
+                className="w-10 h-10 text-blue-600"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -227,16 +80,17 @@ export default function PricingPage() {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold mb-2">End-to-End Encryption</h3>
-            <p className="text-gray-600 dark:text-gray-400">
-              Your conversations are encrypted with your wallet
+            <h3 className="text-2xl font-semibold mb-4">End-to-End Encryption</h3>
+            <p className="text-gray-600 dark:text-gray-400 text-lg">
+              Your conversations are encrypted with your wallet. Only you can read your messages.
             </p>
           </div>
 
+          {/* Feature 2 */}
           <div className="text-center">
-            <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-20 h-20 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mx-auto mb-6">
               <svg
-                className="w-8 h-8 text-purple-600"
+                className="w-10 h-10 text-purple-600"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -249,16 +103,17 @@ export default function PricingPage() {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold mb-2">Blockchain Storage</h3>
-            <p className="text-gray-600 dark:text-gray-400">
-              Permanent storage on Autonomys Network
+            <h3 className="text-2xl font-semibold mb-4">Blockchain Storage</h3>
+            <p className="text-gray-600 dark:text-gray-400 text-lg">
+              Permanent storage on Autonomys Network. Your data never disappears.
             </p>
           </div>
 
+          {/* Feature 3 */}
           <div className="text-center">
-            <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-20 h-20 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-6">
               <svg
-                className="w-8 h-8 text-green-600"
+                className="w-10 h-10 text-green-600"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -271,59 +126,75 @@ export default function PricingPage() {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold mb-2">Private & Secure</h3>
-            <p className="text-gray-600 dark:text-gray-400">
-              Only you can access your data
+            <h3 className="text-2xl font-semibold mb-4">Private & Secure</h3>
+            <p className="text-gray-600 dark:text-gray-400 text-lg">
+              Only you have the keys to your data. Not even we can access it.
             </p>
           </div>
         </div>
       </div>
 
-      {/* FAQ Section */}
-      <div className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
-        <div className="max-w-3xl mx-auto space-y-6">
-          <details className="group p-6 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-            <summary className="font-semibold cursor-pointer">
-              How does blockchain storage work?
-            </summary>
-            <p className="mt-4 text-gray-600 dark:text-gray-400">
-              Your chat history is encrypted with your wallet and stored on the Autonomys
-              blockchain. This means your data is permanent, decentralized, and only
-              accessible by you.
+      {/* How It Works Section */}
+      <div className="container mx-auto px-4 py-24 bg-gray-50 dark:bg-gray-900 rounded-3xl">
+        <h2 className="text-4xl font-bold text-center mb-16">
+          How It Works
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="text-center">
+            <div className="text-5xl font-bold text-blue-600 mb-4">1</div>
+            <h3 className="text-xl font-semibold mb-2">Connect Wallet</h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              Connect your Web3 wallet to get started
             </p>
-          </details>
+          </div>
+          <div className="text-center">
+            <div className="text-5xl font-bold text-blue-600 mb-4">2</div>
+            <h3 className="text-xl font-semibold mb-2">Start Chatting</h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              Have conversations with AI - all encrypted
+            </p>
+          </div>
+          <div className="text-center">
+            <div className="text-5xl font-bold text-blue-600 mb-4">3</div>
+            <h3 className="text-xl font-semibold mb-2">Stored Forever</h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              Your chats are saved on the blockchain permanently
+            </p>
+          </div>
+        </div>
+      </div>
 
-          <details className="group p-6 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-            <summary className="font-semibold cursor-pointer">
-              What payment methods do you accept?
-            </summary>
-            <p className="mt-4 text-gray-600 dark:text-gray-400">
-              We accept AI3 tokens only on Autonomys Network. AI3 is the native utility token
-              of the Autonomys ecosystem, designed specifically for AI services. You can pay
-              using Autonomys Auto EVM (EVM-compatible chain).
-            </p>
-          </details>
+      {/* CTA Section */}
+      <div className="container mx-auto px-4 py-24 text-center">
+        <h2 className="text-4xl md:text-5xl font-bold mb-6">
+          Ready to get started?
+        </h2>
+        <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
+          Start with our free plan - no credit card required
+        </p>
+        <Link
+          href="/chat"
+          className="inline-block px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold rounded-lg transition-colors"
+        >
+          Start Chatting Free
+        </Link>
+      </div>
 
-          <details className="group p-6 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-            <summary className="font-semibold cursor-pointer">
-              Can I cancel my subscription?
-            </summary>
-            <p className="mt-4 text-gray-600 dark:text-gray-400">
-              Yes, you can cancel anytime. You'll continue to have access until the end of your
-              billing period. Your stored data remains on the blockchain forever.
-            </p>
-          </details>
-
-          <details className="group p-6 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-            <summary className="font-semibold cursor-pointer">
-              Is my data really private?
-            </summary>
-            <p className="mt-4 text-gray-600 dark:text-gray-400">
-              Absolutely. All conversations are encrypted end-to-end with your wallet address.
-              Even we cannot read your chat history. Only you have the keys to decrypt your data.
-            </p>
-          </details>
+      {/* Footer */}
+      <div className="container mx-auto px-4 py-8 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-400">
+          <div>© 2024 AI Memory Box. All rights reserved.</div>
+          <div className="flex gap-6">
+            <Link href="/pricing" className="hover:underline">
+              Pricing
+            </Link>
+            <Link href="/dashboard" className="hover:underline">
+              Dashboard
+            </Link>
+            <Link href="/chat" className="hover:underline">
+              Chat
+            </Link>
+          </div>
         </div>
       </div>
     </div>
