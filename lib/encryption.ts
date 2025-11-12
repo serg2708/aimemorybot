@@ -107,3 +107,32 @@ export async function decryptData(
 export function isEncryptionAvailable(): boolean {
   return typeof crypto !== 'undefined' && typeof crypto.subtle !== 'undefined';
 }
+
+/**
+ * Encrypt chat messages array (for backward compatibility)
+ */
+export async function encryptMessages(
+  messages: any[],
+  address: string
+): Promise<string> {
+  const json = JSON.stringify(messages);
+  const encrypted = await encryptData(json, address);
+  if (!encrypted) {
+    throw new Error('Failed to encrypt messages');
+  }
+  return encrypted;
+}
+
+/**
+ * Decrypt chat messages array (for backward compatibility)
+ */
+export async function decryptMessages(
+  encryptedData: string,
+  address: string
+): Promise<any[]> {
+  const decrypted = await decryptData(encryptedData, address);
+  if (!decrypted) {
+    throw new Error('Failed to decrypt messages');
+  }
+  return JSON.parse(decrypted);
+}
