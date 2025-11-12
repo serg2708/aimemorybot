@@ -34,9 +34,12 @@ export const autonomys = {
 } as const;
 
 // Autonomys Auto EVM (EVM-compatible, for AI3 token payments)
+// Use NEXT_PUBLIC_AUTONOMYS_NETWORK=mainnet or testnet (default: mainnet)
+const isTestnet = process.env.NEXT_PUBLIC_AUTONOMYS_NETWORK === 'testnet';
+
 export const autonomysAutoEVM = {
-  id: 490001, // Replace with actual chain ID
-  name: 'Autonomys Auto EVM',
+  id: 490001,
+  name: isTestnet ? 'Autonomys Auto EVM Testnet' : 'Autonomys Auto EVM Mainnet',
   nativeCurrency: {
     decimals: 18,
     name: 'AUTO',
@@ -44,21 +47,31 @@ export const autonomysAutoEVM = {
   },
   rpcUrls: {
     default: {
-      http: [process.env.NEXT_PUBLIC_AUTONOMYS_AUTO_EVM_RPC || 'https://auto-evm-rpc.autonomys.xyz'],
-      webSocket: [process.env.NEXT_PUBLIC_AUTONOMYS_AUTO_EVM_WS || 'wss://auto-evm-ws.autonomys.xyz'],
+      http: [isTestnet
+        ? 'https://auto-evm.chronos.autonomys.xyz'
+        : 'https://auto-evm.mainnet.autonomys.xyz'],
+      webSocket: [isTestnet
+        ? 'wss://auto-evm.chronos.autonomys.xyz/ws'
+        : 'wss://auto-evm.mainnet.autonomys.xyz/ws'],
     },
     public: {
-      http: [process.env.NEXT_PUBLIC_AUTONOMYS_AUTO_EVM_RPC || 'https://auto-evm-rpc.autonomys.xyz'],
-      webSocket: [process.env.NEXT_PUBLIC_AUTONOMYS_AUTO_EVM_WS || 'wss://auto-evm-ws.autonomys.xyz'],
+      http: [isTestnet
+        ? 'https://auto-evm.chronos.autonomys.xyz'
+        : 'https://auto-evm.mainnet.autonomys.xyz'],
+      webSocket: [isTestnet
+        ? 'wss://auto-evm.chronos.autonomys.xyz/ws'
+        : 'wss://auto-evm.mainnet.autonomys.xyz/ws'],
     },
   },
   blockExplorers: {
     default: {
       name: 'Autonomys Auto EVM Explorer',
-      url: 'https://auto-evm-explorer.autonomys.xyz',
+      url: isTestnet
+        ? 'https://explorer.chronos.autonomys.xyz'
+        : 'https://explorer.mainnet.autonomys.xyz',
     },
   },
-  testnet: false,
+  testnet: isTestnet,
 } as const;
 
 /**
