@@ -4,40 +4,13 @@
  */
 
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
-
-// Autonomys Network (Substrate-based, for DSN storage)
-export const autonomys = {
-  id: 490000,
-  name: 'Autonomys Network',
-  nativeCurrency: {
-    decimals: 18,
-    name: 'AUTO',
-    symbol: 'AUTO',
-  },
-  rpcUrls: {
-    default: {
-      http: ['https://rpc-chronos.autonomys.xyz'],
-      webSocket: ['wss://rpc-chronos.autonomys.xyz'],
-    },
-    public: {
-      http: ['https://rpc-chronos.autonomys.xyz'],
-      webSocket: ['wss://rpc-chronos.autonomys.xyz'],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: 'Autonomys Explorer',
-      url: 'https://explorer.autonomys.xyz',
-    },
-  },
-  testnet: false,
-} as const;
+import { defineChain } from 'viem';
 
 // Autonomys Auto EVM (EVM-compatible, for AI3 token payments)
 // Use NEXT_PUBLIC_AUTONOMYS_NETWORK=mainnet or testnet (default: mainnet)
 const isTestnet = process.env.NEXT_PUBLIC_AUTONOMYS_NETWORK === 'testnet';
 
-export const autonomysAutoEVM = {
+export const autonomysAutoEVM = defineChain({
   id: 490001,
   name: isTestnet ? 'Autonomys Auto EVM Testnet' : 'Autonomys Auto EVM Mainnet',
   nativeCurrency: {
@@ -47,14 +20,6 @@ export const autonomysAutoEVM = {
   },
   rpcUrls: {
     default: {
-      http: [isTestnet
-        ? 'https://auto-evm.chronos.autonomys.xyz'
-        : 'https://auto-evm.mainnet.autonomys.xyz'],
-      webSocket: [isTestnet
-        ? 'wss://auto-evm.chronos.autonomys.xyz/ws'
-        : 'wss://auto-evm.mainnet.autonomys.xyz/ws'],
-    },
-    public: {
       http: [isTestnet
         ? 'https://auto-evm.chronos.autonomys.xyz'
         : 'https://auto-evm.mainnet.autonomys.xyz'],
@@ -72,6 +37,31 @@ export const autonomysAutoEVM = {
     },
   },
   testnet: isTestnet,
+});
+
+// Autonomys Network (Substrate-based, for DSN storage)
+// Note: NOT used with wagmi/RainbowKit as it's not EVM-compatible
+export const autonomys = {
+  id: 490000,
+  name: 'Autonomys Network',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'AUTO',
+    symbol: 'AUTO',
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://rpc-chronos.autonomys.xyz'],
+      webSocket: ['wss://rpc-chronos.autonomys.xyz'],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: 'Autonomys Explorer',
+      url: 'https://explorer.autonomys.xyz',
+    },
+  },
+  testnet: false,
 } as const;
 
 /**
@@ -87,10 +77,7 @@ export const getWeb3Config = () => {
   return getDefaultConfig({
     appName: 'AI Memory Box',
     projectId: projectId || 'YOUR_PROJECT_ID', // Fallback for development
-    chains: [
-      autonomysAutoEVM as any, // Autonomys Auto EVM (EVM-compatible only)
-      // Note: autonomys (Substrate) is not EVM-compatible and can't be used with wagmi/RainbowKit
-    ],
+    chains: [autonomysAutoEVM], // Autonomys Auto EVM (EVM-compatible only)
     ssr: false, // Disable SSR to avoid indexedDB errors on server
   });
 };
