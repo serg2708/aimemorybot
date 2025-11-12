@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { useAccount } from 'wagmi';
 import { WalletConnect } from '@/components/wallet-connect';
 import { SubscriptionCard } from '@/components/subscription-badge';
+import { SubscriptionDebug } from '@/components/subscription-debug';
 import {
   SubscriptionPlan,
   PLAN_PRICES,
@@ -36,10 +37,14 @@ export default function PricingPage() {
 
     try {
       const amount = calculatePaymentAmount(plan, duration);
-      await subscribe(plan, duration, amount);
-    } catch (err) {
+      console.log('Subscribing to plan:', { plan, duration, amount: amount.toString() });
+      const result = await subscribe(plan, duration, amount);
+      console.log('Subscription result:', result);
+      alert('Subscription successful! Transaction submitted.');
+    } catch (err: any) {
       console.error('Subscription failed:', err);
-      alert('Subscription failed. Please try again.');
+      const errorMessage = err?.message || err?.toString() || 'Unknown error';
+      alert(`Subscription failed: ${errorMessage}\n\nCheck console for details.`);
     }
   };
 
@@ -320,6 +325,11 @@ export default function PricingPage() {
             </p>
           </details>
         </div>
+      </div>
+
+      {/* Debug Component */}
+      <div id="subscription-debug">
+        <SubscriptionDebug />
       </div>
     </div>
   );
