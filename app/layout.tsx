@@ -2,16 +2,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
-import dynamic from "next/dynamic";
+import { ClientProviders } from "@/components/client-providers";
 
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
-
-// Dynamic import for Web3 Providers to avoid SSR issues with indexedDB
-const Providers = dynamic(
-  () => import("@/components/providers").then((mod) => mod.Providers),
-  { ssr: false }
-);
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://aimemorybox.com"),
@@ -79,10 +73,10 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        <Providers>
+        <ClientProviders>
           <Toaster position="top-center" />
           <SessionProvider>{children}</SessionProvider>
-        </Providers>
+        </ClientProviders>
       </body>
     </html>
   );
