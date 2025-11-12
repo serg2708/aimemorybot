@@ -24,7 +24,7 @@ This guide explains how to deploy the Subscription smart contract to Autonomys A
 
 3. **Compile the Contract**
    - Go to "Solidity Compiler" tab
-   - Select compiler version: `0.8.20` or higher
+   - Select compiler version: `0.8.30` or higher
    - Click "Compile Subscription.sol"
 
 4. **Connect to Autonomys Network**
@@ -78,7 +78,7 @@ This guide explains how to deploy the Subscription smart contract to Autonomys A
    const PRIVATE_KEY = process.env.PRIVATE_KEY || "";
 
    module.exports = {
-     solidity: "0.8.20",
+     solidity: "0.8.30",
      networks: {
        chronos: {
          url: "https://rpc-0.chronos.autonomys.xyz",
@@ -169,7 +169,7 @@ This guide explains how to deploy the Subscription smart contract to Autonomys A
    On the block explorer:
    - Go to your contract address
    - Click "Verify and Publish"
-   - Select compiler version: `0.8.20`
+   - Select compiler version: `0.8.30`
    - Paste the contract code
    - Submit verification
 
