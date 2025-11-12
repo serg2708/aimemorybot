@@ -1,6 +1,7 @@
 /**
  * Client-side subscription management
  * Handles subscription state, wallet interactions, and contract calls
+ * Falls back to mock mode when contract is not configured
  */
 
 'use client';
@@ -16,11 +17,37 @@ import {
   getDaysUntilExpiration,
 } from './contract';
 import { CONTRACT_ADDRESSES } from './web3';
+import {
+  useMockSubscription,
+  useMockSubscribe,
+  useMockExtendSubscription,
+  useMockCancelSubscription,
+} from './subscription-mock';
+
+// Check if we should use mock mode
+const useMockMode = () => {
+  const { chainId } = useAccount();
+  const contractAddress = chainId
+    ? CONTRACT_ADDRESSES.subscription[chainId as keyof typeof CONTRACT_ADDRESSES.subscription]
+    : undefined;
+
+  // Use mock mode if:
+  // 1. Explicitly enabled via env var, OR
+  // 2. Contract address is not configured
+  return (
+    process.env.NEXT_PUBLIC_MOCK_SUBSCRIPTION === 'true' ||
+    !contractAddress ||
+    contractAddress === ''
+  );
+};
 
 /**
  * Hook to get user's subscription data
+ * Automatically uses mock mode if contract is not configured
  */
 export function useSubscription() {
+  const mockMode = useMockMode();
+  const mockSubscription = useMockSubscription();
   const { address, chainId } = useAccount();
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -36,11 +63,16 @@ export function useSubscription() {
     functionName: 'getSubscription',
     args: address ? [address] : undefined,
     query: {
-      enabled: !!address && !!contractAddress,
+      enabled: !!address && !!contractAddress && !mockMode,
     },
   });
 
   useEffect(() => {
+    if (mockMode) {
+      // Use mock data
+      return;
+    }
+
     if (isReading) {
       setIsLoading(true);
     } else if (isError) {
@@ -52,7 +84,12 @@ export function useSubscription() {
     } else {
       setIsLoading(false);
     }
-  }, [data, isError, isReading]);
+  }, [data, isError, isReading, mockMode]);
+
+  // Return mock data if in mock mode
+  if (mockMode) {
+    return mockSubscription;
+  }
 
   return {
     subscription,
@@ -65,8 +102,11 @@ export function useSubscription() {
 
 /**
  * Hook to subscribe to a plan
+ * Automatically uses mock mode if contract is not configured
  */
 export function useSubscribe() {
+  const mockMode = useMockMode();
+  const mockSubscribe = useMockSubscribe();
   const { writeContractAsync, data: hash, isPending, error } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
@@ -78,6 +118,11 @@ export function useSubscribe() {
     duration: 'monthly' | 'yearly',
     value: bigint
   ) => {
+    // Use mock mode if enabled
+    if (mockMode) {
+      return mockSubscribe.subscribe(plan, duration, value);
+    }
+
     const contractAddress = chainId
       ? CONTRACT_ADDRESSES.subscription[chainId as keyof typeof CONTRACT_ADDRESSES.subscription]
       : undefined;
@@ -99,6 +144,18 @@ export function useSubscribe() {
     });
   };
 
+  // Return mock state if in mock mode
+  if (mockMode) {
+    return {
+      subscribe,
+      hash: mockSubscribe.hash,
+      isPending: mockSubscribe.isPending,
+      isConfirming: mockSubscribe.isConfirming,
+      isSuccess: mockSubscribe.isSuccess,
+      error: mockSubscribe.error,
+    };
+  }
+
   return {
     subscribe,
     hash,
@@ -111,8 +168,11 @@ export function useSubscribe() {
 
 /**
  * Hook to extend subscription
+ * Automatically uses mock mode if contract is not configured
  */
 export function useExtendSubscription() {
+  const mockMode = useMockMode();
+  const mockExtend = useMockExtendSubscription();
   const { writeContractAsync, data: hash, isPending, error } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
@@ -120,6 +180,11 @@ export function useExtendSubscription() {
   const { chainId } = useAccount();
 
   const extend = async (duration: 'monthly' | 'yearly', value: bigint) => {
+    // Use mock mode if enabled
+    if (mockMode) {
+      return mockExtend.extend(duration, value);
+    }
+
     const contractAddress = chainId
       ? CONTRACT_ADDRESSES.subscription[chainId as keyof typeof CONTRACT_ADDRESSES.subscription]
       : undefined;
@@ -141,6 +206,18 @@ export function useExtendSubscription() {
     });
   };
 
+  // Return mock state if in mock mode
+  if (mockMode) {
+    return {
+      extend,
+      hash: mockExtend.hash,
+      isPending: mockExtend.isPending,
+      isConfirming: mockExtend.isConfirming,
+      isSuccess: mockExtend.isSuccess,
+      error: mockExtend.error,
+    };
+  }
+
   return {
     extend,
     hash,
@@ -153,8 +230,11 @@ export function useExtendSubscription() {
 
 /**
  * Hook to cancel subscription
+ * Automatically uses mock mode if contract is not configured
  */
 export function useCancelSubscription() {
+  const mockMode = useMockMode();
+  const mockCancel = useMockCancelSubscription();
   const { writeContractAsync, data: hash, isPending, error } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
@@ -162,6 +242,11 @@ export function useCancelSubscription() {
   const { chainId } = useAccount();
 
   const cancel = async () => {
+    // Use mock mode if enabled
+    if (mockMode) {
+      return mockCancel.cancel();
+    }
+
     const contractAddress = chainId
       ? CONTRACT_ADDRESSES.subscription[chainId as keyof typeof CONTRACT_ADDRESSES.subscription]
       : undefined;
@@ -176,6 +261,18 @@ export function useCancelSubscription() {
       functionName: 'cancelSubscription',
     });
   };
+
+  // Return mock state if in mock mode
+  if (mockMode) {
+    return {
+      cancel,
+      hash: mockCancel.hash,
+      isPending: mockCancel.isPending,
+      isConfirming: mockCancel.isConfirming,
+      isSuccess: mockCancel.isSuccess,
+      error: mockCancel.error,
+    };
+  }
 
   return {
     cancel,
