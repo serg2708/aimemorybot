@@ -88,8 +88,8 @@ export const getWeb3Config = () => {
     appName: 'AI Memory Box',
     projectId: projectId || 'YOUR_PROJECT_ID', // Fallback for development
     chains: [
-      autonomys as any, // Autonomys Network (Substrate)
-      autonomysAutoEVM as any, // Autonomys Auto EVM
+      autonomysAutoEVM as any, // Autonomys Auto EVM (EVM-compatible only)
+      // Note: autonomys (Substrate) is not EVM-compatible and can't be used with wagmi/RainbowKit
     ],
     ssr: true, // Enable server-side rendering
   });
