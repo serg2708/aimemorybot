@@ -10,6 +10,8 @@ import { PlusIcon, VercelIcon } from "./icons";
 import { useSidebar } from "./ui/sidebar";
 import { VisibilitySelector, type VisibilityType } from "./visibility-selector";
 import { HeaderWalletConnect } from "./wallet-connect";
+import { NetworkStatus } from "./network-status";
+import { DSNStatus } from "./dsn-status";
 
 function PureChatHeader({
   chatId,
@@ -51,7 +53,9 @@ function PureChatHeader({
         />
       )}
 
-      <div className="order-3 ml-auto">
+      <div className="order-3 ml-auto flex items-center gap-2">
+        <DSNStatus />
+        <NetworkStatus />
         <HeaderWalletConnect />
       </div>
     </header>
