@@ -91,7 +91,7 @@ export const getWeb3Config = () => {
       autonomysAutoEVM as any, // Autonomys Auto EVM (EVM-compatible only)
       // Note: autonomys (Substrate) is not EVM-compatible and can't be used with wagmi/RainbowKit
     ],
-    ssr: true, // Enable server-side rendering
+    ssr: false, // Disable SSR to avoid indexedDB errors on server
   });
 };
 

@@ -2,10 +2,16 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Providers } from "@/components/providers";
+import dynamic from "next/dynamic";
 
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
+
+// Dynamic import for Web3 Providers to avoid SSR issues with indexedDB
+const Providers = dynamic(
+  () => import("@/components/providers").then((mod) => mod.Providers),
+  { ssr: false }
+);
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://aimemorybox.com"),
