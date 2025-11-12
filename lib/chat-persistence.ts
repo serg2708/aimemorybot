@@ -52,9 +52,9 @@ const AUTO_SAVE_CONFIG = {
   syncIntervalMs: 60000, // Sync to DSN every minute
 };
 
-// Debounce timers
-const saveTimers: Record<string, NodeJS.Timeout> = {};
-let syncTimer: NodeJS.Timeout | null = null;
+// Debounce timers (using ReturnType for browser compatibility)
+const saveTimers: Record<string, ReturnType<typeof setTimeout>> = {};
+let syncTimer: ReturnType<typeof setTimeout> | null = null;
 
 /**
  * Get all chats from local storage
