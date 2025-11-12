@@ -8,6 +8,7 @@
 import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { getAutoDriveStatus } from '@/lib/auto-drive';
+import { notifyCopied, notifyDSNConnected, notifyDSNDisconnected } from '@/lib/notifications';
 
 interface DSNStatusData {
   connected: boolean;
@@ -149,7 +150,7 @@ export function DSNStatus() {
                     <button
                       onClick={() => {
                         navigator.clipboard.writeText(status.lastCID!);
-                        // TODO: Show toast notification
+                        notifyCopied('CID');
                       }}
                       className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
                       title="Copy CID"
