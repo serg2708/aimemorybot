@@ -9,7 +9,6 @@ import { useState } from 'react';
 import { useAccount } from 'wagmi';
 import { WalletConnect } from '@/components/wallet-connect';
 import { SubscriptionCard } from '@/components/subscription-badge';
-import { SubscriptionDebug } from '@/components/subscription-debug';
 import {
   SubscriptionPlan,
   PLAN_PRICES,
@@ -325,11 +324,6 @@ export default function PricingPage() {
             </p>
           </details>
         </div>
-      </div>
-
-      {/* Debug Component */}
-      <div id="subscription-debug">
-        <SubscriptionDebug />
       </div>
     </div>
   );
