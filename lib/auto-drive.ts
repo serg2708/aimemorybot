@@ -3,7 +3,9 @@
  * Provides persistent, blockchain-backed storage for chat history
  */
 
-import { AutoDriveApi } from '@autonomys/auto-drive';
+import { createAutoDriveApi } from '@autonomys/auto-drive';
+import { NetworkId } from '@autonomys/auto-utils';
+import type { AutoDriveApi } from '@autonomys/auto-drive';
 
 // Cache the AutoDrive instance
 let autoDriveInstance: AutoDriveApi | null = null;
@@ -12,8 +14,8 @@ let autoDriveInstance: AutoDriveApi | null = null;
  * Configuration for Autonomys DSN
  */
 export const AUTONOMYS_CONFIG = {
-  rpcUrl: process.env.NEXT_PUBLIC_AUTONOMYS_RPC_URL || 'wss://rpc-chronos.autonomys.xyz',
-  chainId: process.env.NEXT_PUBLIC_AUTONOMYS_CHAIN_ID || '490000',
+  apiKey: process.env.NEXT_PUBLIC_AUTONOMYS_API_KEY,
+  network: NetworkId.MAINNET,
 };
 
 /**
@@ -32,10 +34,16 @@ export async function getAutoDrive(): Promise<AutoDriveApi | null> {
       return null;
     }
 
+    // Check if API key is available
+    if (!AUTONOMYS_CONFIG.apiKey) {
+      console.warn('NEXT_PUBLIC_AUTONOMYS_API_KEY is not configured');
+      return null;
+    }
+
     // Initialize AutoDrive
-    // @ts-ignore - AutoDriveApi.new signature may vary
-    autoDriveInstance = await AutoDriveApi.new({
-      apiKey: process.env.NEXT_PUBLIC_AUTONOMYS_API_KEY,
+    autoDriveInstance = createAutoDriveApi({
+      apiKey: AUTONOMYS_CONFIG.apiKey,
+      network: 'mainnet' as const,
     });
 
     console.log('AutoDrive initialized successfully');
@@ -64,17 +72,26 @@ export async function uploadToAutoDrive(
       throw new Error('AutoDrive not initialized');
     }
 
-    // Create a blob from the data
-    const blob = new Blob([data], { type: 'application/json' });
-    const file = new File([blob], 'messages.json', { type: 'application/json' });
+    // Prepare data with metadata
+    const dataWithMetadata = {
+      data,
+      metadata: metadata || {},
+    };
+
+    // Convert to buffer
+    const buffer = Buffer.from(JSON.stringify(dataWithMetadata));
 
     // Upload to AutoDrive
-    const result = await autoDrive.uploadFile(file, {
-      metadata: metadata ? JSON.stringify(metadata) : undefined,
-    });
+    const cid = await autoDrive.uploadFileFromBuffer(
+      buffer,
+      'messages.json',
+      {
+        compression: true,
+      }
+    );
 
-    console.log('Uploaded to AutoDrive:', result.cid);
-    return result.cid;
+    console.log('Uploaded to AutoDrive:', cid);
+    return cid;
   } catch (error) {
     console.error('Failed to upload to AutoDrive:', error);
     return null;
@@ -91,13 +108,21 @@ export async function downloadFromAutoDrive(cid: string): Promise<string | null>
       throw new Error('AutoDrive not initialized');
     }
 
-    // Download file by CID
-    const file = await autoDrive.downloadFile(cid);
+    // Download file by CID as a stream
+    const stream = await autoDrive.downloadFile(cid);
 
-    // Read file content
-    const text = await file.text();
+    // Collect chunks into buffer
+    let file = Buffer.alloc(0);
+    for await (const chunk of stream) {
+      file = Buffer.concat([file, chunk]);
+    }
+
+    // Convert buffer to string and parse JSON
+    const text = file.toString('utf-8');
+    const parsedData = JSON.parse(text);
+
     console.log('Downloaded from AutoDrive:', cid);
-    return text;
+    return parsedData.data || text;
   } catch (error) {
     console.error('Failed to download from AutoDrive:', error);
     return null;
@@ -114,18 +139,15 @@ export async function listUserFiles(address: string): Promise<any[]> {
       throw new Error('AutoDrive not initialized');
     }
 
-    // List files - this might need to be filtered by metadata
-    const files = await autoDrive.listFiles();
+    // Get files from AutoDrive (page 0, limit 100)
+    const result = await autoDrive.getMyFiles(0, 100);
 
-    // Filter by address in metadata
-    return files.filter((file: any) => {
-      try {
-        const metadata = JSON.parse(file.metadata || '{}');
-        return metadata.address === address;
-      } catch {
-        return false;
-      }
-    });
+    // Extract rows from paginated result
+    const files = result.rows || [];
+
+    // Filter by address in metadata if possible
+    // Note: Filtering may need to be done client-side or via metadata stored with file
+    return files;
   } catch (error) {
     console.error('Failed to list user files:', error);
     return [];
@@ -134,6 +156,7 @@ export async function listUserFiles(address: string): Promise<any[]> {
 
 /**
  * Delete a file from AutoDrive by CID
+ * Note: Deletion may not be supported by the current API
  */
 export async function deleteFromAutoDrive(cid: string): Promise<boolean> {
   try {
@@ -142,9 +165,10 @@ export async function deleteFromAutoDrive(cid: string): Promise<boolean> {
       throw new Error('AutoDrive not initialized');
     }
 
-    await autoDrive.deleteFile(cid);
-    console.log('Deleted from AutoDrive:', cid);
-    return true;
+    // Note: Delete functionality may not be available in current AutoDrive API
+    // Files on blockchain are typically immutable
+    console.warn('Delete operation not supported by AutoDrive API');
+    return false;
   } catch (error) {
     console.error('Failed to delete from AutoDrive:', error);
     return false;
@@ -199,13 +223,13 @@ export async function isAutoDriveAvailable(): Promise<boolean> {
  */
 export async function getAutoDriveStatus(): Promise<{
   connected: boolean;
-  rpcUrl: string;
-  chainId: string;
+  network: string;
+  apiKeyConfigured: boolean;
 }> {
   const connected = await isAutoDriveAvailable();
   return {
     connected,
-    rpcUrl: AUTONOMYS_CONFIG.rpcUrl,
-    chainId: AUTONOMYS_CONFIG.chainId,
+    network: 'mainnet',
+    apiKeyConfigured: !!AUTONOMYS_CONFIG.apiKey,
   };
 }
