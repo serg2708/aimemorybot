@@ -55,19 +55,19 @@ export function useMockSubscription() {
             });
           }
         } else {
-          // Default to FREE plan
+          // Default to FREE plan - always active
           setSubscription({
             plan: SubscriptionPlan.FREE,
             expiresAt: 0,
-            isActive: false,
+            isActive: true, // FREE plan is always active
           });
         }
       } else {
-        // No localStorage available (SSR)
+        // No localStorage available (SSR) - default to FREE
         setSubscription({
           plan: SubscriptionPlan.FREE,
           expiresAt: 0,
-          isActive: false,
+          isActive: true, // FREE plan is always active
         });
       }
       setIsLoading(false);
@@ -326,6 +326,9 @@ export function useMockCancelSubscription() {
  * Check if subscription is active
  */
 function isSubscriptionActive(subscription: SubscriptionData): boolean {
+  // FREE plan is always active
+  if (subscription.plan === SubscriptionPlan.FREE) return true;
+
   if (!subscription.isActive) return false;
   const now = Math.floor(Date.now() / 1000);
   return subscription.expiresAt > now;

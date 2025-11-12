@@ -241,6 +241,9 @@ export function encodeApprove(spender: Address, amount: bigint): `0x${string}` {
  * Check if subscription is active
  */
 export function isSubscriptionActive(subscription: SubscriptionData): boolean {
+  // FREE plan is always active
+  if (subscription.plan === SubscriptionPlan.FREE) return true;
+
   if (!subscription.isActive) return false;
   const now = Math.floor(Date.now() / 1000);
   return subscription.expiresAt > now;

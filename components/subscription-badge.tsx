@@ -5,7 +5,8 @@
 
 'use client';
 
-import { useSubscription } from '@/lib/subscription';
+import { useState } from 'react';
+import { useSubscription, useCancelSubscription } from '@/lib/subscription';
 import { SubscriptionPlan, getPlanName, PLAN_FEATURES } from '@/lib/contract';
 import { useAccount } from 'wagmi';
 
@@ -64,6 +65,8 @@ export function SubscriptionBadge() {
 export function SubscriptionCard() {
   const { address } = useAccount();
   const { subscription, isActive, daysLeft, isLoading } = useSubscription();
+  const { cancel, isPending: isCancelling } = useCancelSubscription();
+  const [showManageModal, setShowManageModal] = useState(false);
 
   if (!address) {
     return (
@@ -91,7 +94,23 @@ export function SubscriptionCard() {
   const planName = getPlanName(plan);
   const features = PLAN_FEATURES[plan];
 
+  const handleCancel = async () => {
+    if (!confirm('Are you sure you want to cancel your subscription? You will still have access until the end of your billing period.')) {
+      return;
+    }
+
+    try {
+      await cancel();
+      alert('Subscription cancelled successfully!');
+      setShowManageModal(false);
+    } catch (error: any) {
+      console.error('Failed to cancel subscription:', error);
+      alert(`Failed to cancel subscription: ${error?.message || 'Unknown error'}`);
+    }
+  };
+
   return (
+    <>
     <div className="p-6 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold">{planName} Plan</h3>
@@ -165,10 +184,7 @@ export function SubscriptionCard() {
               Extend
             </a>
             <button
-              onClick={() => {
-                // TODO: Implement cancel
-                console.log('Cancel subscription');
-              }}
+              onClick={() => setShowManageModal(true)}
               className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-center rounded-lg font-medium transition-colors"
             >
               Manage
@@ -177,6 +193,50 @@ export function SubscriptionCard() {
         )}
       </div>
     </div>
+
+    {/* Manage Subscription Modal */}
+    {showManageModal && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowManageModal(false)}>
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+          <h3 className="text-xl font-bold mb-4">Manage Subscription</h3>
+
+          <div className="mb-6">
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              You are currently on the <strong>{planName}</strong> plan.
+            </p>
+
+            {isActive && subscription?.expiresAt && (
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                Your subscription will expire on{' '}
+                <strong>{new Date(subscription.expiresAt * 1000).toLocaleDateString()}</strong>
+                {daysLeft > 0 && ` (${daysLeft} days left)`}.
+              </p>
+            )}
+
+            <p className="text-sm text-gray-500 dark:text-gray-500 mb-4">
+              Canceling will stop auto-renewal but you'll keep access until the end of your billing period.
+            </p>
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              onClick={handleCancel}
+              disabled={isCancelling}
+              className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isCancelling ? 'Cancelling...' : 'Cancel Subscription'}
+            </button>
+            <button
+              onClick={() => setShowManageModal(false)}
+              className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }
 
