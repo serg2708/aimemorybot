@@ -24,8 +24,8 @@ export function StorageStatus() {
   const [storageInfo, setStorageInfo] = useState<StorageInfo | null>(null);
   const [dsnStatus, setDsnStatus] = useState<{
     connected: boolean;
-    rpcUrl: string;
-    chainId: string;
+    network: string;
+    apiKeyConfigured: boolean;
   } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
