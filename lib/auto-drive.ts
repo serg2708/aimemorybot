@@ -21,9 +21,12 @@ let autoDriveInstance: AutoDriveApi | null = null;
 /**
  * Configuration for Autonomys DSN
  */
+const isTestnet = process.env.NEXT_PUBLIC_AUTONOMYS_NETWORK === 'testnet';
+
 export const AUTONOMYS_CONFIG = {
   apiKey: process.env.NEXT_PUBLIC_AUTONOMYS_API_KEY,
-  network: NetworkId.MAINNET,
+  network: isTestnet ? NetworkId.TAURUS : NetworkId.MAINNET,
+  networkName: isTestnet ? 'taurus' : 'mainnet',
 };
 
 /**
@@ -51,7 +54,7 @@ export async function getAutoDrive(): Promise<AutoDriveApi | null> {
     // Initialize AutoDrive
     autoDriveInstance = createAutoDriveApi({
       apiKey: AUTONOMYS_CONFIG.apiKey,
-      network: 'mainnet' as const,
+      network: AUTONOMYS_CONFIG.networkName as 'mainnet' | 'taurus',
     });
 
     console.log('AutoDrive initialized successfully');
