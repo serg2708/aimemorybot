@@ -11,7 +11,7 @@ import { defineChain } from 'viem';
 const isTestnet = process.env.NEXT_PUBLIC_AUTONOMYS_NETWORK === 'testnet';
 
 export const autonomysAutoEVM = defineChain({
-  id: isTestnet ? 8700 : 490001, // Testnet (Chronos): 8700, Mainnet: 490001
+  id: isTestnet ? 8700 : 870, // Testnet (Chronos): 8700, Mainnet: 870
   name: isTestnet ? 'AutoEVM Testnet (Chronos)' : 'AutoEVM Mainnet',
   nativeCurrency: {
     decimals: 18,
