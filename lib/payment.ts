@@ -14,6 +14,18 @@ import {
 } from './contract';
 import { getAI3TokenAddress, getAI3TokenName } from './web3';
 import { ERC20_ABI } from './contract';
+import {
+  retryTransaction,
+  retryNetworkRequest,
+  handleError,
+  parseWeb3Error,
+} from './error-handling';
+import {
+  notifyTransactionSubmitted,
+  notifyTransactionConfirmed,
+  notifyTransactionFailed,
+  notifyInsufficientBalance,
+} from './notifications';
 
 /**
  * Payment method types - AI3 only
@@ -42,25 +54,61 @@ export function usePayment() {
   });
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
 
+  // Get token balance for validation
+  const tokenAddress = chainId ? getAI3TokenAddress(chainId) : undefined;
+  const { data: balance } = useBalance({
+    address,
+    token: tokenAddress as `0x${string}`,
+    query: {
+      enabled: !!address && !!tokenAddress,
+    },
+  });
+
   const processPayment = async (data: PaymentData) => {
-    if (!address || !chainId) {
-      throw new Error('Wallet not connected');
+    try {
+      if (!address || !chainId) {
+        throw new Error('Wallet not connected');
+      }
+
+      const ai3TokenAddress = getAI3TokenAddress(chainId);
+      if (!ai3TokenAddress) {
+        throw new Error('AI3 token not available on this chain');
+      }
+
+      // Check balance first
+      if (balance && balance.value < data.amount) {
+        const required = formatPaymentAmount(data.amount);
+        const current = formatPaymentAmount(balance.value);
+        notifyInsufficientBalance(required, current);
+        throw new Error('Insufficient balance');
+      }
+
+      setPaymentData(data);
+
+      // Transfer AI3 tokens to recipient with retry logic
+      await retryTransaction(async () => {
+        writeContract({
+          address: ai3TokenAddress as `0x${string}`,
+          abi: ERC20_ABI,
+          functionName: 'transfer',
+          args: [data.recipient, data.amount],
+        });
+      }, 'Payment transaction');
+
+    } catch (err) {
+      const parsedError = parseWeb3Error(err);
+      handleError(err, 'Payment processing');
+
+      if (parsedError.type === 'insufficient_funds') {
+        notifyTransactionFailed('Insufficient funds');
+      } else if (parsedError.type === 'user_rejected') {
+        notifyTransactionFailed('Transaction rejected by user');
+      } else {
+        notifyTransactionFailed(parsedError.message);
+      }
+
+      throw err;
     }
-
-    const ai3TokenAddress = getAI3TokenAddress(chainId);
-    if (!ai3TokenAddress) {
-      throw new Error('AI3 token not available on this chain');
-    }
-
-    setPaymentData(data);
-
-    // Transfer AI3 tokens to recipient
-    writeContract({
-      address: ai3TokenAddress as `0x${string}`,
-      abi: ERC20_ABI,
-      functionName: 'transfer',
-      args: [data.recipient, data.amount],
-    });
   };
 
   return {
@@ -146,25 +194,27 @@ export async function createAI3PaymentSession(
   userAddress: string
 ): Promise<{ sessionId: string; paymentUrl: string } | null> {
   try {
-    const response = await fetch('/api/payment/create-session', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        plan,
-        duration,
-        userAddress,
-      }),
-    });
+    return await retryNetworkRequest(async () => {
+      const response = await fetch('/api/payment/create-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          plan,
+          duration,
+          userAddress,
+        }),
+      });
 
-    if (!response.ok) {
-      throw new Error('Failed to create payment session');
-    }
+      if (!response.ok) {
+        throw new Error('Failed to create payment session');
+      }
 
-    return await response.json();
+      return await response.json();
+    }, 'Create payment session');
   } catch (error) {
-    console.error('Error creating AI3 payment session:', error);
+    handleError(error, 'Creating payment session');
     return null;
   }
 }
@@ -174,16 +224,18 @@ export async function createAI3PaymentSession(
  */
 export async function verifyAI3Payment(sessionId: string): Promise<boolean> {
   try {
-    const response = await fetch(`/api/payment/verify?sessionId=${sessionId}`);
+    return await retryNetworkRequest(async () => {
+      const response = await fetch(`/api/payment/verify?sessionId=${sessionId}`);
 
-    if (!response.ok) {
-      throw new Error('Failed to verify payment');
-    }
+      if (!response.ok) {
+        throw new Error('Failed to verify payment');
+      }
 
-    const data = await response.json();
-    return data.verified === true;
+      const data = await response.json();
+      return data.verified === true;
+    }, 'Verify payment');
   } catch (error) {
-    console.error('Error verifying AI3 payment:', error);
+    handleError(error, 'Verifying payment');
     return false;
   }
 }

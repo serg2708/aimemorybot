@@ -6,6 +6,14 @@
 import { createAutoDriveApi } from '@autonomys/auto-drive';
 import { NetworkId } from '@autonomys/auto-utils';
 import type { AutoDriveApi } from '@autonomys/auto-drive';
+import { retryDSNOperation, handleError, DSNError } from './error-handling';
+import {
+  notifyFileUploaded,
+  notifyFileDownloading,
+  notifyFileDownloaded,
+  notifyDSNConnected,
+  notifyAPIKeyMissing,
+} from './notifications';
 
 // Cache the AutoDrive instance
 let autoDriveInstance: AutoDriveApi | null = null;
@@ -69,31 +77,38 @@ export async function uploadToAutoDrive(
   try {
     const autoDrive = await getAutoDrive();
     if (!autoDrive) {
-      throw new Error('AutoDrive not initialized');
+      if (!AUTONOMYS_CONFIG.apiKey) {
+        notifyAPIKeyMissing();
+      }
+      throw new DSNError('AutoDrive not initialized');
     }
 
-    // Prepare data with metadata
-    const dataWithMetadata = {
-      data,
-      metadata: metadata || {},
-    };
+    // Upload with retry logic
+    const cid = await retryDSNOperation(async () => {
+      // Prepare data with metadata
+      const dataWithMetadata = {
+        data,
+        metadata: metadata || {},
+      };
 
-    // Convert to buffer
-    const buffer = Buffer.from(JSON.stringify(dataWithMetadata));
+      // Convert to buffer
+      const buffer = Buffer.from(JSON.stringify(dataWithMetadata));
 
-    // Upload to AutoDrive
-    const cid = await autoDrive.uploadFileFromBuffer(
-      buffer,
-      'messages.json',
-      {
-        compression: true,
-      }
-    );
+      // Upload to AutoDrive
+      return await autoDrive.uploadFileFromBuffer(
+        buffer,
+        'messages.json',
+        {
+          compression: true,
+        }
+      );
+    }, 'Upload to AutoDrive');
 
     console.log('Uploaded to AutoDrive:', cid);
+    notifyFileUploaded(cid);
     return cid;
   } catch (error) {
-    console.error('Failed to upload to AutoDrive:', error);
+    handleError(error, 'Uploading to AutoDrive');
     return null;
   }
 }
@@ -105,26 +120,37 @@ export async function downloadFromAutoDrive(cid: string): Promise<string | null>
   try {
     const autoDrive = await getAutoDrive();
     if (!autoDrive) {
-      throw new Error('AutoDrive not initialized');
+      if (!AUTONOMYS_CONFIG.apiKey) {
+        notifyAPIKeyMissing();
+      }
+      throw new DSNError('AutoDrive not initialized', cid);
     }
 
-    // Download file by CID as a stream
-    const stream = await autoDrive.downloadFile(cid);
+    notifyFileDownloading(cid);
 
-    // Collect chunks into buffer
-    let file = Buffer.alloc(0);
-    for await (const chunk of stream) {
-      file = Buffer.concat([file, chunk]);
-    }
+    // Download with retry logic
+    const data = await retryDSNOperation(async () => {
+      // Download file by CID as a stream
+      const stream = await autoDrive.downloadFile(cid);
 
-    // Convert buffer to string and parse JSON
-    const text = file.toString('utf-8');
-    const parsedData = JSON.parse(text);
+      // Collect chunks into buffer
+      let file = Buffer.alloc(0);
+      for await (const chunk of stream) {
+        file = Buffer.concat([file, chunk]);
+      }
+
+      // Convert buffer to string and parse JSON
+      const text = file.toString('utf-8');
+      const parsedData = JSON.parse(text);
+
+      return parsedData.data || text;
+    }, 'Download from AutoDrive');
 
     console.log('Downloaded from AutoDrive:', cid);
-    return parsedData.data || text;
+    notifyFileDownloaded(cid);
+    return data;
   } catch (error) {
-    console.error('Failed to download from AutoDrive:', error);
+    handleError(error, 'Downloading from AutoDrive');
     return null;
   }
 }
