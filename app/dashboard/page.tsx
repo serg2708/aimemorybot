@@ -15,6 +15,8 @@ import { StorageStatus } from '@/components/storage-status';
 import { getPaymentHistory, PaymentTracker, PaymentStatus } from '@/lib/payment';
 import { formatPaymentAmount } from '@/lib/payment';
 import { getAI3TokenName } from '@/lib/web3';
+import { exportAllData, handleFileImport } from '@/lib/export-import';
+import { getLocalChats, saveChat } from '@/lib/chat-persistence';
 
 export default function DashboardPage() {
   const { address, isConnected, chain } = useAccount();
@@ -201,14 +203,34 @@ export default function DashboardPage() {
                   View Plans
                 </Link>
                 <button
-                  onClick={() => {
-                    // TODO: Implement export functionality
-                    alert('Export functionality coming soon!');
+                  onClick={async () => {
+                    await exportAllData();
                   }}
                   className="block w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg font-medium text-center transition-colors"
                 >
                   Export Data
                 </button>
+                <label className="block w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg font-medium text-center transition-colors cursor-pointer">
+                  Import Data
+                  <input
+                    type="file"
+                    accept=".json"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        try {
+                          const chats = await handleFileImport(file);
+                          // Save imported chats
+                          chats.forEach((chat) => saveChat(chat, false));
+                          window.location.reload();
+                        } catch (error) {
+                          console.error('Import failed:', error);
+                        }
+                      }
+                    }}
+                  />
+                </label>
               </div>
             </div>
 
