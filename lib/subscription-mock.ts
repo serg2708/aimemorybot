@@ -11,6 +11,16 @@ import { useAccount } from 'wagmi';
 import { SubscriptionPlan, type SubscriptionData } from './contract';
 
 /**
+ * Safe localStorage access (only in browser)
+ */
+const getLocalStorage = () => {
+  if (typeof window !== 'undefined') {
+    return window.localStorage;
+  }
+  return null;
+};
+
+/**
  * Mock subscription hook - simulates blockchain interactions
  */
 export function useMockSubscription() {
@@ -28,13 +38,32 @@ export function useMockSubscription() {
     // Simulate loading delay
     setIsLoading(true);
     setTimeout(() => {
-      // Load from localStorage
-      const stored = localStorage.getItem(`mock_subscription_${address}`);
-      if (stored) {
-        const data = JSON.parse(stored);
-        setSubscription(data);
+      const storage = getLocalStorage();
+      if (storage) {
+        // Load from localStorage
+        const stored = storage.getItem(`mock_subscription_${address}`);
+        if (stored) {
+          try {
+            const data = JSON.parse(stored);
+            setSubscription(data);
+          } catch (error) {
+            console.error('Failed to parse stored subscription:', error);
+            setSubscription({
+              plan: SubscriptionPlan.FREE,
+              expiresAt: 0,
+              isActive: false,
+            });
+          }
+        } else {
+          // Default to FREE plan
+          setSubscription({
+            plan: SubscriptionPlan.FREE,
+            expiresAt: 0,
+            isActive: false,
+          });
+        }
       } else {
-        // Default to FREE plan
+        // No localStorage available (SSR)
         setSubscription({
           plan: SubscriptionPlan.FREE,
           expiresAt: 0,
@@ -76,6 +105,11 @@ export function useMockSubscribe() {
       throw new Error('Wallet not connected');
     }
 
+    const storage = getLocalStorage();
+    if (!storage) {
+      throw new Error('localStorage not available');
+    }
+
     setIsPending(true);
     setError(null);
     setIsSuccess(false);
@@ -97,7 +131,7 @@ export function useMockSubscribe() {
         isActive: true,
       };
 
-      localStorage.setItem(`mock_subscription_${address}`, JSON.stringify(subscription));
+      storage.setItem(`mock_subscription_${address}`, JSON.stringify(subscription));
 
       setIsPending(false);
       setIsConfirming(true);
@@ -109,9 +143,11 @@ export function useMockSubscribe() {
       setIsSuccess(true);
 
       // Reload page to update subscription status
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
+      if (typeof window !== 'undefined') {
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      }
 
       return { hash: '0xmock' + Math.random().toString(36).substring(2) };
     } catch (err: any) {
@@ -147,13 +183,18 @@ export function useMockExtendSubscription() {
       throw new Error('Wallet not connected');
     }
 
+    const storage = getLocalStorage();
+    if (!storage) {
+      throw new Error('localStorage not available');
+    }
+
     setIsPending(true);
     setError(null);
     setIsSuccess(false);
 
     try {
       // Load current subscription
-      const stored = localStorage.getItem(`mock_subscription_${address}`);
+      const stored = storage.getItem(`mock_subscription_${address}`);
       if (!stored) {
         throw new Error('No subscription to extend');
       }
@@ -178,7 +219,7 @@ export function useMockExtendSubscription() {
         isActive: true,
       };
 
-      localStorage.setItem(`mock_subscription_${address}`, JSON.stringify(subscription));
+      storage.setItem(`mock_subscription_${address}`, JSON.stringify(subscription));
 
       setIsPending(false);
       setIsConfirming(true);
@@ -190,9 +231,11 @@ export function useMockExtendSubscription() {
       setIsSuccess(true);
 
       // Reload page to update subscription status
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
+      if (typeof window !== 'undefined') {
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      }
 
       return { hash: '0xmock' + Math.random().toString(36).substring(2) };
     } catch (err: any) {
@@ -228,6 +271,11 @@ export function useMockCancelSubscription() {
       throw new Error('Wallet not connected');
     }
 
+    const storage = getLocalStorage();
+    if (!storage) {
+      throw new Error('localStorage not available');
+    }
+
     setIsPending(true);
     setError(null);
     setIsSuccess(false);
@@ -237,7 +285,7 @@ export function useMockCancelSubscription() {
       await new Promise(resolve => setTimeout(resolve, 1500));
 
       // Remove subscription
-      localStorage.removeItem(`mock_subscription_${address}`);
+      storage.removeItem(`mock_subscription_${address}`);
 
       setIsPending(false);
       setIsConfirming(true);
@@ -249,9 +297,11 @@ export function useMockCancelSubscription() {
       setIsSuccess(true);
 
       // Reload page to update subscription status
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
+      if (typeof window !== 'undefined') {
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      }
 
       return { hash: '0xmock' + Math.random().toString(36).substring(2) };
     } catch (err: any) {
