@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
-import { ThemeProvider } from "@/components/theme-provider";
 import { ClientProviders } from "@/components/client-providers";
+import { SessionProviderWrapper } from "@/components/session-provider-wrapper";
 
 import "./globals.css";
-import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://aimemorybox.com"),
@@ -75,7 +74,7 @@ export default function RootLayout({
       <body className="antialiased">
         <ClientProviders>
           <Toaster position="top-center" />
-          <SessionProvider>{children}</SessionProvider>
+          <SessionProviderWrapper>{children}</SessionProviderWrapper>
         </ClientProviders>
       </body>
     </html>
