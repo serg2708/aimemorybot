@@ -13,14 +13,13 @@ import { getWeb3Config } from '@/lib/web3';
 import { ThemeProvider } from 'next-themes';
 import { useState, type ReactNode } from 'react';
 
-const queryClient = new QueryClient();
-
 interface ProvidersProps {
   children: ReactNode;
 }
 
 export function Providers({ children }: ProvidersProps) {
   const [config] = useState(() => getWeb3Config());
+  const [queryClient] = useState(() => new QueryClient());
 
   return (
     <ThemeProvider
