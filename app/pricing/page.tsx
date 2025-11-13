@@ -1,7 +1,8 @@
+'use client';
+
 import dynamic from 'next/dynamic';
 
 // Dynamic import to prevent SSR issues
-// ssr: false already prevents static generation
 const PricingClient = dynamic(() => import('./pricing-client').then(mod => ({ default: mod.default })), {
   ssr: false,
   loading: () => (
