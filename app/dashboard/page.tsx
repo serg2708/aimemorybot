@@ -1,19 +1,4 @@
-'use client';
-
-import dynamic from 'next/dynamic';
-
-// Dynamic import to prevent SSR issues
-const DashboardClient = dynamic(() => import('./dashboard-client').then(mod => ({ default: mod.default })), {
-  ssr: false,
-  loading: () => (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-        <p>Loading dashboard...</p>
-      </div>
-    </div>
-  ),
-});
+import DashboardClient from './dashboard-client';
 
 export default function DashboardPage() {
   return <DashboardClient />;
