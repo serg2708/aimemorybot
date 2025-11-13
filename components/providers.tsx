@@ -26,8 +26,8 @@ export function Providers({ children }: ProvidersProps) {
     setIsMounted(true);
   }, []);
 
-  // Show children with ThemeProvider only during SSR
-  // Full providers after client mount
+  // Show loading indicator until Web3 providers are ready
+  // This prevents components from trying to use wagmi hooks before WagmiProvider is mounted
   if (!isMounted) {
     return (
       <ThemeProvider
@@ -36,7 +36,12 @@ export function Providers({ children }: ProvidersProps) {
         enableSystem
         disableTransitionOnChange
       >
-        {children}
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-foreground">Initializing...</p>
+          </div>
+        </div>
       </ThemeProvider>
     );
   }
