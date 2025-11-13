@@ -6,7 +6,7 @@
 'use client';
 
 import { Providers } from '@/components/providers';
-import type { ReactNode };
+import type { ReactNode } from 'react';
 
 interface ClientProvidersProps {
   children: ReactNode;
