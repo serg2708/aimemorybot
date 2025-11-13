@@ -6,7 +6,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useAccount } from 'wagmi';
+import { useAccount } from '@/hooks/use-web3-safe';
 import { WalletConnect } from '@/components/wallet-connect';
 import { SubscriptionCard } from '@/components/subscription-badge';
 import {

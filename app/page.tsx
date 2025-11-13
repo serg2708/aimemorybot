@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useAccount } from 'wagmi';
+import { useAccount } from '@/hooks/use-web3-safe';
 import { WalletConnect } from '@/components/wallet-connect';
 import Link from 'next/link';
 
