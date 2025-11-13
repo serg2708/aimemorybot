@@ -1,9 +1,7 @@
 import dynamic from 'next/dynamic';
 
-// Force dynamic rendering to avoid SSG issues with Web3
-export const dynamic = 'force-dynamic';
-
 // Dynamic import to prevent SSR issues
+// ssr: false already prevents static generation
 const PricingClient = dynamic(() => import('./pricing-client').then(mod => ({ default: mod.default })), {
   ssr: false,
   loading: () => (
