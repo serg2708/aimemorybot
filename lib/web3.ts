@@ -6,8 +6,14 @@
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
 import { defineChain } from 'viem';
 
+// Helper function to determine network (only safe to call on client)
+const getIsTestnet = () => {
+  if (typeof window === 'undefined') return false; // Default to mainnet on server
+  return process.env.NEXT_PUBLIC_AUTONOMYS_NETWORK === 'testnet';
+};
+
 // Autonomys Auto EVM (EVM-compatible, for AI3 token payments)
-// Use NEXT_PUBLIC_AUTONOMYS_NETWORK=mainnet or testnet (default: testnet)
+// Use NEXT_PUBLIC_AUTONOMYS_NETWORK=mainnet or testnet (default: mainnet)
 const isTestnet = process.env.NEXT_PUBLIC_AUTONOMYS_NETWORK === 'testnet';
 
 export const autonomysAutoEVM = defineChain({
