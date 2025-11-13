@@ -19,14 +19,12 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
   const [mounted, setMounted] = useState(false);
-  const [config] = useState(() => {
-    // Only create config on client
-    if (typeof window === 'undefined') return null;
-    return getWeb3Config();
-  });
+  const [config, setConfig] = useState<ReturnType<typeof getWeb3Config> | null>(null);
   const [queryClient] = useState(() => new QueryClient());
 
   useEffect(() => {
+    // Create config only on client side
+    setConfig(getWeb3Config());
     setMounted(true);
   }, []);
 
