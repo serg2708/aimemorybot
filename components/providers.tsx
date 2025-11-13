@@ -20,13 +20,39 @@ interface ProvidersProps {
 export function Providers({ children }: ProvidersProps) {
   const [mounted, setMounted] = useState(false);
   const [config, setConfig] = useState<ReturnType<typeof getWeb3Config> | null>(null);
+  const [error, setError] = useState<Error | null>(null);
   const [queryClient] = useState(() => new QueryClient());
 
   useEffect(() => {
-    // Create config only on client side
-    setConfig(getWeb3Config());
-    setMounted(true);
+    try {
+      // Create config only on client side
+      const wagmiConfig = getWeb3Config();
+      console.log('[Providers] Config created successfully:', wagmiConfig);
+      setConfig(wagmiConfig);
+      setMounted(true);
+    } catch (err) {
+      console.error('[Providers] Failed to create config:', err);
+      setError(err as Error);
+    }
   }, []);
+
+  // Show error if config creation failed
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-8">
+        <div className="max-w-2xl w-full bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
+          <h2 className="text-xl font-bold text-red-800 dark:text-red-200 mb-4">
+            Configuration Error
+          </h2>
+          <pre className="text-sm text-red-700 dark:text-red-300 whitespace-pre-wrap overflow-auto">
+            {error.message}
+            {'\n\n'}
+            {error.stack}
+          </pre>
+        </div>
+      </div>
+    );
+  }
 
   // During SSR or before mount, show loading screen
   // This prevents wagmi hooks from being called before providers are ready
@@ -40,6 +66,8 @@ export function Providers({ children }: ProvidersProps) {
       </div>
     );
   }
+
+  console.log('[Providers] Rendering with config, mounted:', mounted);
 
   return (
     <ThemeProvider
