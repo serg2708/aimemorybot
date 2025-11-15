@@ -18,18 +18,6 @@ interface ProvidersProps {
   children: ReactNode;
 }
 
-// Loading screen component
-function LoadingScreen() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-        <p className="text-muted-foreground">Loading Web3...</p>
-      </div>
-    </div>
-  );
-}
-
 // Error screen component
 function ErrorScreen({ error }: { error: Error }) {
   return (
@@ -59,8 +47,15 @@ function ErrorScreen({ error }: { error: Error }) {
 export function Providers({ children }: ProvidersProps) {
   // Single mount check to ensure we're on the client
   const [mounted, setMounted] = useState(false);
-  const [wagmiConfig, setWagmiConfig] = useState<ReturnType<typeof getWeb3Config> | null>(null);
-  const [error, setError] = useState<Error | null>(null);
+  const [wagmiConfig] = useState(() => {
+    // Initialize config once during component initialization
+    try {
+      return getWeb3Config();
+    } catch (err) {
+      console.error('[Providers] Failed to initialize Web3:', err);
+      return null;
+    }
+  });
 
   // Create QueryClient only once
   const [queryClient] = useState(() => new QueryClient({
@@ -73,26 +68,17 @@ export function Providers({ children }: ProvidersProps) {
   }));
 
   useEffect(() => {
-    // Initialize Web3 config on client side only
-    try {
-      const config = getWeb3Config();
-      setWagmiConfig(config);
-      setMounted(true);
-    } catch (err) {
-      console.error('[Providers] Failed to initialize Web3:', err);
-      setError(err as Error);
-      setMounted(true); // Still mark as mounted to show error
-    }
+    setMounted(true);
   }, []);
 
-  // Show loading screen during initial mount
+  // Don't render anything until mounted to avoid hydration mismatch
   if (!mounted) {
-    return <LoadingScreen />;
+    return null;
   }
 
   // Show error screen if config creation failed
-  if (error || !wagmiConfig) {
-    return <ErrorScreen error={error || new Error('Failed to create Web3 config')} />;
+  if (!wagmiConfig) {
+    return <ErrorScreen error={new Error('Failed to create Web3 config')} />;
   }
 
   // Render all providers in a single tree

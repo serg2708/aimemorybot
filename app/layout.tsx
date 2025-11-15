@@ -72,10 +72,12 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        <ClientProviders>
-          <Toaster position="top-center" />
-          <SessionProviderWrapper>{children}</SessionProviderWrapper>
-        </ClientProviders>
+        <SessionProviderWrapper>
+          <ClientProviders>
+            <Toaster position="top-center" />
+            {children}
+          </ClientProviders>
+        </SessionProviderWrapper>
       </body>
     </html>
   );
