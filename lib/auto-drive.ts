@@ -20,13 +20,21 @@ let autoDriveInstance: AutoDriveApi | null = null;
 
 /**
  * Configuration for Autonomys DSN
+ *
+ * IMPORTANT: Auto Drive currently only supports MAINNET
+ * - Taurus testnet was shut down on September 12, 2025
+ * - Chronos testnet is not yet supported by Auto Drive API
+ * - For now, all uploads go to Mainnet regardless of AUTONOMYS_NETWORK setting
+ *
+ * Get your API key from: https://ai3.storage/
+ * - Sign in with Google, Discord, or GitHub
+ * - Navigate to Developers → Create API Key
+ * - Free tier: 20MB/month upload limit
  */
-const isTestnet = process.env.NEXT_PUBLIC_AUTONOMYS_NETWORK === 'testnet';
-
 export const AUTONOMYS_CONFIG = {
   apiKey: process.env.NEXT_PUBLIC_AUTONOMYS_API_KEY,
-  network: isTestnet ? NetworkId.TAURUS : NetworkId.MAINNET,
-  networkName: isTestnet ? 'taurus' : 'mainnet',
+  network: NetworkId.MAINNET,
+  networkName: 'mainnet' as const,
 };
 
 /**
