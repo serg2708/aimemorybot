@@ -1,66 +1,57 @@
+/**
+ * Chat page - Main chat interface
+ * Simplified structure based on working home page
+ */
+
 'use client';
 
-import { useSession } from 'next-auth/react';
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useAccount } from '@/hooks/use-web3-safe';
 import { Chat } from '@/components/chat';
 import { DataStreamHandler } from '@/components/data-stream-handler';
 import { DEFAULT_CHAT_MODEL } from '@/lib/ai/models';
 import { generateUUID } from '@/lib/utils';
+import Link from 'next/link';
+import { WalletConnect } from '@/components/wallet-connect';
 
 export default function ChatClient() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-  const [chatModel, setChatModel] = useState(DEFAULT_CHAT_MODEL);
+  const { isConnected } = useAccount();
+  const [chatModel] = useState(DEFAULT_CHAT_MODEL);
   const [chatId] = useState(() => generateUUID());
 
-  useEffect(() => {
-    // Redirect to guest auth if not authenticated
-    if (status === 'unauthenticated') {
-      router.push('/api/auth/guest');
-      return;
-    }
-
-    // Get chat model from cookie
-    if (typeof window !== 'undefined') {
-      const cookieValue = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('chat-model='))
-        ?.split('=')[1];
-
-      if (cookieValue) {
-        setChatModel(cookieValue);
-      }
-    }
-  }, [status, router]);
-
-  if (status === 'loading') {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p>Loading chat...</p>
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+      {/* Header */}
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex justify-between items-center">
+          <Link href="/" className="text-2xl font-bold hover:opacity-80 transition-opacity">
+            AI Memory Box
+          </Link>
+          <div className="flex gap-4 items-center">
+            <Link href="/pricing" className="text-sm font-medium hover:underline">
+              Pricing
+            </Link>
+            <Link href="/dashboard" className="text-sm font-medium hover:underline">
+              Dashboard
+            </Link>
+            <WalletConnect />
+          </div>
         </div>
       </div>
-    );
-  }
 
-  if (!session) {
-    return null;
-  }
-
-  return (
-    <>
-      <Chat
-        autoResume={false}
-        id={chatId}
-        initialChatModel={chatModel}
-        initialMessages={[]}
-        initialVisibilityType="private"
-        isReadonly={false}
-        key={chatId}
-      />
-      <DataStreamHandler />
-    </>
+      {/* Chat Interface */}
+      <div className="container mx-auto px-4">
+        <Chat
+          autoResume={false}
+          id={chatId}
+          initialChatModel={chatModel}
+          initialMessages={[]}
+          initialVisibilityType="private"
+          isReadonly={false}
+          key={chatId}
+        />
+        <DataStreamHandler />
+      </div>
+    </div>
   );
 }
