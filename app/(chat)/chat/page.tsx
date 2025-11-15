@@ -1,52 +1,20 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { Chat } from "@/components/chat";
-import { DataStreamHandler } from "@/components/data-stream-handler";
-import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
-import { generateUUID } from "@/lib/utils";
-import { auth } from "../../(auth)/auth";
+'use client';
 
-export default async function Page() {
-  const session = await auth();
+import dynamic from 'next/dynamic';
 
-  if (!session) {
-    redirect("/api/auth/guest");
-  }
+// Dynamic import to prevent SSR issues with Web3 and chat functionality
+const ChatClient = dynamic(() => import('./chat-client').then(mod => ({ default: mod.default })), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-screen">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p>Loading chat...</p>
+      </div>
+    </div>
+  ),
+});
 
-  const id = generateUUID();
-
-  const cookieStore = await cookies();
-  const modelIdFromCookie = cookieStore.get("chat-model");
-
-  if (!modelIdFromCookie) {
-    return (
-      <>
-        <Chat
-          autoResume={false}
-          id={id}
-          initialChatModel={DEFAULT_CHAT_MODEL}
-          initialMessages={[]}
-          initialVisibilityType="private"
-          isReadonly={false}
-          key={id}
-        />
-        <DataStreamHandler />
-      </>
-    );
-  }
-
-  return (
-    <>
-      <Chat
-        autoResume={false}
-        id={id}
-        initialChatModel={modelIdFromCookie.value}
-        initialMessages={[]}
-        initialVisibilityType="private"
-        isReadonly={false}
-        key={id}
-      />
-      <DataStreamHandler />
-    </>
-  );
+export default function ChatPage() {
+  return <ChatClient />;
 }
