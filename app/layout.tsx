@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import { Toaster } from "sonner";
 import { ClientProviders } from "@/components/client-providers";
 import { SessionProviderWrapper } from "@/components/session-provider-wrapper";
@@ -9,24 +10,16 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL("https://aimemorybox.com"),
   title: "AI Memory Box - Chat with Permanent Blockchain Memory",
-  description: "AI-powered chat with permanent memory stored on Autonomys blockchain. Your conversations, encrypted and preserved forever.",
+  description:
+    "AI-powered chat with permanent memory stored on Autonomys blockchain. Your conversations, encrypted and preserved forever.",
 };
 
 export const viewport = {
   maximumScale: 1, // Disable auto-zoom on mobile Safari
 };
 
-const geist = Geist({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-geist",
-});
-
-const geistMono = Geist_Mono({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-geist-mono",
-});
+const geist = GeistSans;
+const geistMono = GeistMono;
 
 const LIGHT_THEME_COLOR = "hsl(0 0% 100%)";
 const DARK_THEME_COLOR = "hsl(240deg 10% 3.92%)";

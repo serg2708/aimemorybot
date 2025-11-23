@@ -2,16 +2,16 @@
  * Memory Storage - Combines encryption and Autonomys DSN for secure chat history
  */
 
-import type { ChatMessage } from '@/lib/types';
-import { encryptMessages, decryptMessages } from './encryption';
+import type { ChatMessage } from "@/lib/types";
 import {
-  uploadToAutoDrive,
   downloadFromAutoDrive,
   isAutoDriveAvailable,
-} from './auto-drive';
+  uploadToAutoDrive,
+} from "./auto-drive";
+import { decryptMessages, encryptMessages } from "./encryption";
 
-const STORAGE_PREFIX = 'aimemorybox_';
-const CID_STORAGE_KEY = 'aimemorybox_cids';
+const STORAGE_PREFIX = "aimemorybox_";
+const CID_STORAGE_KEY = "aimemorybox_cids";
 
 /**
  * Storage options
@@ -41,11 +41,7 @@ export async function saveMessages(
   messages: ChatMessage[],
   options: StorageOptions = {}
 ): Promise<string | null> {
-  const {
-    encrypted = true,
-    useDSN = true,
-    fallbackToLocal = true,
-  } = options;
+  const { encrypted = true, useDSN = true, fallbackToLocal = true } = options;
 
   try {
     // Prepare data
@@ -85,9 +81,9 @@ export async function saveMessages(
       return null; // No CID for local storage
     }
 
-    throw new Error('Failed to save messages - no storage method available');
+    throw new Error("Failed to save messages - no storage method available");
   } catch (error) {
-    console.error('Error saving messages:', error);
+    console.error("Error saving messages:", error);
     throw error;
   }
 }
@@ -100,11 +96,7 @@ export async function loadMessages(
   cid?: string,
   options: StorageOptions = {}
 ): Promise<ChatMessage[]> {
-  const {
-    encrypted = true,
-    useDSN = true,
-    fallbackToLocal = true,
-  } = options;
+  const { encrypted = true, useDSN = true, fallbackToLocal = true } = options;
 
   try {
     let data: string | null = null;
@@ -134,11 +126,10 @@ export async function loadMessages(
     // Decrypt if needed
     if (encrypted) {
       return await decryptMessages(data, address);
-    } else {
-      return JSON.parse(data);
     }
+    return JSON.parse(data);
   } catch (error) {
-    console.error('Error loading messages:', error);
+    console.error("Error loading messages:", error);
     // Return empty array on error rather than throwing
     return [];
   }
@@ -176,7 +167,7 @@ export async function deleteMessages(
 
     return success;
   } catch (error) {
-    console.error('Error deleting messages:', error);
+    console.error("Error deleting messages:", error);
     return false;
   }
 }
@@ -192,7 +183,11 @@ export function getLatestCID(address: string): string | null {
 /**
  * Save CID mapping locally
  */
-function saveCIDMapping(address: string, cid: string, messageCount: number): void {
+function saveCIDMapping(
+  address: string,
+  cid: string,
+  messageCount: number
+): void {
   try {
     const mappings = getAllCIDMappings();
     mappings[address] = {
@@ -202,7 +197,7 @@ function saveCIDMapping(address: string, cid: string, messageCount: number): voi
     };
     localStorage.setItem(CID_STORAGE_KEY, JSON.stringify(mappings));
   } catch (error) {
-    console.error('Error saving CID mapping:', error);
+    console.error("Error saving CID mapping:", error);
   }
 }
 
@@ -214,7 +209,7 @@ function getCIDMapping(address: string): CIDMapping[string] | null {
     const mappings = getAllCIDMappings();
     return mappings[address] || null;
   } catch (error) {
-    console.error('Error getting CID mapping:', error);
+    console.error("Error getting CID mapping:", error);
     return null;
   }
 }
@@ -227,7 +222,7 @@ function getAllCIDMappings(): CIDMapping {
     const data = localStorage.getItem(CID_STORAGE_KEY);
     return data ? JSON.parse(data) : {};
   } catch (error) {
-    console.error('Error getting all CID mappings:', error);
+    console.error("Error getting all CID mappings:", error);
     return {};
   }
 }
@@ -241,7 +236,7 @@ function deleteCIDMapping(address: string): void {
     delete mappings[address];
     localStorage.setItem(CID_STORAGE_KEY, JSON.stringify(mappings));
   } catch (error) {
-    console.error('Error deleting CID mapping:', error);
+    console.error("Error deleting CID mapping:", error);
   }
 }
 
@@ -270,7 +265,9 @@ export function getStorageInfo(address: string): {
 /**
  * Migrate messages from localStorage to DSN
  */
-export async function migrateToAutoDrive(address: string): Promise<string | null> {
+export async function migrateToAutoDrive(
+  address: string
+): Promise<string | null> {
   try {
     // Load from localStorage
     const messages = await loadMessages(address, undefined, {
@@ -280,7 +277,7 @@ export async function migrateToAutoDrive(address: string): Promise<string | null
     });
 
     if (messages.length === 0) {
-      console.log('No messages to migrate');
+      console.log("No messages to migrate");
       return null;
     }
 
@@ -294,7 +291,7 @@ export async function migrateToAutoDrive(address: string): Promise<string | null
     console.log(`Migrated ${messages.length} messages to DSN for ${address}`);
     return cid;
   } catch (error) {
-    console.error('Error migrating to AutoDrive:', error);
+    console.error("Error migrating to AutoDrive:", error);
     return null;
   }
 }

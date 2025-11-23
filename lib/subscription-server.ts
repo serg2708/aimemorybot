@@ -3,15 +3,15 @@
  * Used in API routes to check subscription status
  */
 
-import { createPublicClient, http } from 'viem';
-import { mainnet } from 'viem/chains';
+import { createPublicClient, http } from "viem";
+import { mainnet } from "viem/chains";
 import {
+  isSubscriptionActive,
+  parseSubscription,
   SUBSCRIPTION_ABI,
   type SubscriptionData,
-  parseSubscription,
-  isSubscriptionActive,
-} from './contract';
-import { CONTRACT_ADDRESSES } from './web3';
+} from "./contract";
+import { CONTRACT_ADDRESSES } from "./web3";
 
 /**
  * Cache for subscription data to reduce RPC calls
@@ -40,7 +40,9 @@ export async function getSubscription(
 
   try {
     const contractAddress =
-      CONTRACT_ADDRESSES.subscription[chainId as keyof typeof CONTRACT_ADDRESSES.subscription];
+      CONTRACT_ADDRESSES.subscription[
+        chainId as keyof typeof CONTRACT_ADDRESSES.subscription
+      ];
 
     if (!contractAddress) {
       console.error(`No subscription contract for chain ${chainId}`);
@@ -57,7 +59,7 @@ export async function getSubscription(
     const data = await client.readContract({
       address: contractAddress as `0x${string}`,
       abi: SUBSCRIPTION_ABI,
-      functionName: 'getSubscription',
+      functionName: "getSubscription",
       args: [address as `0x${string}`],
     });
 
@@ -71,7 +73,7 @@ export async function getSubscription(
 
     return subscription;
   } catch (error) {
-    console.error('Error fetching subscription:', error);
+    console.error("Error fetching subscription:", error);
     return null;
   }
 }
@@ -109,14 +111,16 @@ export function getSubscriptionCacheStats(): {
   size: number;
   entries: Array<{ address: string; plan: number; expiresAt: number }>;
 } {
-  const entries = Array.from(subscriptionCache.entries()).map(([key, value]) => {
-    const [address] = key.split('_');
-    return {
-      address,
-      plan: value.data.plan,
-      expiresAt: value.data.expiresAt,
-    };
-  });
+  const entries = Array.from(subscriptionCache.entries()).map(
+    ([key, value]) => {
+      const [address] = key.split("_");
+      return {
+        address,
+        plan: value.data.plan,
+        expiresAt: value.data.expiresAt,
+      };
+    }
+  );
 
   return {
     size: subscriptionCache.size,
@@ -168,7 +172,7 @@ export async function checkMessageLimit(
         limit = 1000;
         break;
       case 3: // UNLIMITED
-        limit = Infinity;
+        limit = Number.POSITIVE_INFINITY;
         break;
     }
   }
@@ -182,7 +186,9 @@ export async function checkMessageLimit(
 /**
  * Rate limiting based on subscription tier
  */
-export function getRateLimitBySubscription(subscription: SubscriptionData | null): {
+export function getRateLimitBySubscription(
+  subscription: SubscriptionData | null
+): {
   requestsPerMinute: number;
   requestsPerHour: number;
   requestsPerDay: number;
@@ -212,7 +218,7 @@ export function getRateLimitBySubscription(subscription: SubscriptionData | null
       return {
         requestsPerMinute: 30,
         requestsPerHour: 1000,
-        requestsPerDay: 10000,
+        requestsPerDay: 10_000,
       };
     default:
       return {

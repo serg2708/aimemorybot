@@ -4,15 +4,19 @@
  * Single unified provider component - no complex nesting or dynamic imports
  */
 
-'use client';
+"use client";
 
-import '@rainbow-me/rainbowkit/styles.css';
-import { ThemeProvider } from 'next-themes';
-import { RainbowKitProvider, darkTheme, lightTheme } from '@rainbow-me/rainbowkit';
-import { WagmiProvider } from 'wagmi';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { getWeb3Config } from '@/lib/web3';
-import { useState, useEffect, type ReactNode } from 'react';
+import "@rainbow-me/rainbowkit/styles.css";
+import {
+  darkTheme,
+  lightTheme,
+  RainbowKitProvider,
+} from "@rainbow-me/rainbowkit";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ThemeProvider } from "next-themes";
+import { type ReactNode, useEffect, useState } from "react";
+import { WagmiProvider } from "wagmi";
+import { getWeb3Config } from "@/lib/web3";
 
 interface ProvidersProps {
   children: ReactNode;
@@ -21,21 +25,21 @@ interface ProvidersProps {
 // Error screen component
 function ErrorScreen({ error }: { error: Error }) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-8">
-      <div className="max-w-2xl w-full bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
-        <h2 className="text-xl font-bold text-red-800 dark:text-red-200 mb-4">
+    <div className="flex min-h-screen items-center justify-center bg-background p-8">
+      <div className="w-full max-w-2xl rounded-lg border border-red-200 bg-red-50 p-6 dark:border-red-800 dark:bg-red-900/20">
+        <h2 className="mb-4 font-bold text-red-800 text-xl dark:text-red-200">
           Web3 Configuration Error
         </h2>
-        <p className="text-sm text-red-700 dark:text-red-300 mb-4">
+        <p className="mb-4 text-red-700 text-sm dark:text-red-300">
           Failed to initialize Web3 providers. Please check your configuration.
         </p>
         <details className="text-sm">
-          <summary className="cursor-pointer text-red-600 dark:text-red-400 font-medium mb-2">
+          <summary className="mb-2 cursor-pointer font-medium text-red-600 dark:text-red-400">
             Error Details
           </summary>
-          <pre className="text-xs text-red-700 dark:text-red-300 whitespace-pre-wrap overflow-auto bg-red-100 dark:bg-red-900/40 p-3 rounded">
+          <pre className="overflow-auto whitespace-pre-wrap rounded bg-red-100 p-3 text-red-700 text-xs dark:bg-red-900/40 dark:text-red-300">
             {error.message}
-            {'\n\n'}
+            {"\n\n"}
             {error.stack}
           </pre>
         </details>
@@ -52,20 +56,23 @@ export function Providers({ children }: ProvidersProps) {
     try {
       return getWeb3Config();
     } catch (err) {
-      console.error('[Providers] Failed to initialize Web3:', err);
+      console.error("[Providers] Failed to initialize Web3:", err);
       return null;
     }
   });
 
   // Create QueryClient only once
-  const [queryClient] = useState(() => new QueryClient({
-    defaultOptions: {
-      queries: {
-        refetchOnWindowFocus: false,
-        retry: 1,
-      },
-    },
-  }));
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            refetchOnWindowFocus: false,
+            retry: 1,
+          },
+        },
+      })
+  );
 
   useEffect(() => {
     setMounted(true);
@@ -78,7 +85,7 @@ export function Providers({ children }: ProvidersProps) {
 
   // Show error screen if config creation failed
   if (!wagmiConfig) {
-    return <ErrorScreen error={new Error('Failed to create Web3 config')} />;
+    return <ErrorScreen error={new Error("Failed to create Web3 config")} />;
   }
 
   // Render all providers in a single tree
@@ -86,17 +93,17 @@ export function Providers({ children }: ProvidersProps) {
     <ThemeProvider
       attribute="class"
       defaultTheme="system"
-      enableSystem
       disableTransitionOnChange
+      enableSystem
     >
       <WagmiProvider config={wagmiConfig}>
         <QueryClientProvider client={queryClient}>
           <RainbowKitProvider
+            modalSize="compact"
             theme={{
               lightMode: lightTheme(),
               darkMode: darkTheme(),
             }}
-            modalSize="compact"
           >
             {children}
           </RainbowKitProvider>

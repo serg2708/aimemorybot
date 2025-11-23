@@ -3,11 +3,11 @@
  * Supports Ethereum and EVM-compatible chains
  */
 
-'use client';
+"use client";
 
-import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useAccount } from 'wagmi';
-import { formatAddress } from '@/lib/web3';
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useAccount } from "wagmi";
+import { formatAddress } from "@/lib/web3";
 
 export function WalletConnect() {
   return (
@@ -21,21 +21,21 @@ export function WalletConnect() {
         authenticationStatus,
         mounted,
       }) => {
-        const ready = mounted && authenticationStatus !== 'loading';
+        const ready = mounted && authenticationStatus !== "loading";
         const connected =
           ready &&
           account &&
           chain &&
-          (!authenticationStatus || authenticationStatus === 'authenticated');
+          (!authenticationStatus || authenticationStatus === "authenticated");
 
         return (
           <div
             {...(!ready && {
-              'aria-hidden': true,
+              "aria-hidden": true,
               style: {
                 opacity: 0,
-                pointerEvents: 'none',
-                userSelect: 'none',
+                pointerEvents: "none",
+                userSelect: "none",
               },
             })}
           >
@@ -43,9 +43,9 @@ export function WalletConnect() {
               if (!connected) {
                 return (
                   <button
+                    className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
                     onClick={openConnectModal}
                     type="button"
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
                   >
                     Connect Wallet
                   </button>
@@ -55,9 +55,9 @@ export function WalletConnect() {
               if (chain.unsupported) {
                 return (
                   <button
+                    className="rounded-lg bg-red-600 px-4 py-2 font-medium text-white transition-colors hover:bg-red-700"
                     onClick={openChainModal}
                     type="button"
-                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
                   >
                     Wrong Network
                   </button>
@@ -67,9 +67,9 @@ export function WalletConnect() {
               return (
                 <div className="flex gap-2">
                   <button
+                    className="flex items-center gap-2 rounded-lg bg-gray-700 px-3 py-2 font-medium text-white transition-colors hover:bg-gray-600"
                     onClick={openChainModal}
                     type="button"
-                    className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
                   >
                     {chain.hasIcon && (
                       <div
@@ -78,12 +78,12 @@ export function WalletConnect() {
                           width: 20,
                           height: 20,
                           borderRadius: 999,
-                          overflow: 'hidden',
+                          overflow: "hidden",
                         }}
                       >
                         {chain.iconUrl && (
                           <img
-                            alt={chain.name ?? 'Chain icon'}
+                            alt={chain.name ?? "Chain icon"}
                             src={chain.iconUrl}
                             style={{ width: 20, height: 20 }}
                           />
@@ -94,9 +94,9 @@ export function WalletConnect() {
                   </button>
 
                   <button
+                    className="rounded-lg bg-gray-700 px-4 py-2 font-medium text-white transition-colors hover:bg-gray-600"
                     onClick={openAccountModal}
                     type="button"
-                    className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors"
                   >
                     {formatAddress(account.address)}
                   </button>
@@ -118,10 +118,10 @@ export function SimpleWalletConnect() {
 
   return (
     <ConnectButton
-      label={isConnected && address ? formatAddress(address) : 'Connect Wallet'}
-      showBalance={false}
-      chainStatus="icon"
       accountStatus="address"
+      chainStatus="icon"
+      label={isConnected && address ? formatAddress(address) : "Connect Wallet"}
+      showBalance={false}
     />
   );
 }
@@ -132,12 +132,12 @@ export function SimpleWalletConnect() {
 export function HeaderWalletConnect() {
   return (
     <ConnectButton
-      showBalance={false}
-      chainStatus="icon"
       accountStatus={{
-        smallScreen: 'avatar',
-        largeScreen: 'full',
+        smallScreen: "avatar",
+        largeScreen: "full",
       }}
+      chainStatus="icon"
+      showBalance={false}
     />
   );
 }

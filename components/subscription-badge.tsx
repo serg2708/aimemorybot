@@ -3,12 +3,12 @@
  * Displays user's subscription tier and status
  */
 
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useSubscription, useCancelSubscription } from '@/lib/subscription';
-import { SubscriptionPlan, getPlanName, PLAN_FEATURES } from '@/lib/contract';
-import { useAccount } from 'wagmi';
+import { useState } from "react";
+import { useAccount } from "wagmi";
+import { getPlanName, PLAN_FEATURES, SubscriptionPlan } from "@/lib/contract";
+import { useCancelSubscription, useSubscription } from "@/lib/subscription";
 
 export function SubscriptionBadge() {
   const { address } = useAccount();
@@ -20,8 +20,8 @@ export function SubscriptionBadge() {
 
   if (isLoading) {
     return (
-      <div className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-full text-xs animate-pulse">
-        <div className="h-4 w-16 bg-gray-300 dark:bg-gray-700 rounded"></div>
+      <div className="animate-pulse rounded-full bg-gray-100 px-3 py-1.5 text-xs dark:bg-gray-800">
+        <div className="h-4 w-16 rounded bg-gray-300 dark:bg-gray-700" />
       </div>
     );
   }
@@ -31,24 +31,27 @@ export function SubscriptionBadge() {
 
   // Color scheme based on plan
   const getColorClass = () => {
-    if (!isActive) return 'bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
+    if (!isActive)
+      return "bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
 
     switch (plan) {
       case SubscriptionPlan.FREE:
-        return 'bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
+        return "bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
       case SubscriptionPlan.BASIC:
-        return 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300';
+        return "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300";
       case SubscriptionPlan.PRO:
-        return 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300';
+        return "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300";
       case SubscriptionPlan.UNLIMITED:
-        return 'bg-gradient-to-r from-yellow-100 to-orange-100 text-orange-700 dark:from-yellow-900 dark:to-orange-900 dark:text-orange-300';
+        return "bg-gradient-to-r from-yellow-100 to-orange-100 text-orange-700 dark:from-yellow-900 dark:to-orange-900 dark:text-orange-300";
       default:
-        return 'bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
+        return "bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
     }
   };
 
   return (
-    <div className={`px-3 py-1.5 rounded-full text-xs font-semibold ${getColorClass()}`}>
+    <div
+      className={`rounded-full px-3 py-1.5 font-semibold text-xs ${getColorClass()}`}
+    >
       {planName}
       {isActive && daysLeft > 0 && daysLeft <= 7 && (
         <span className="ml-1 text-red-600 dark:text-red-400">
@@ -70,8 +73,8 @@ export function SubscriptionCard() {
 
   if (!address) {
     return (
-      <div className="p-6 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+      <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+        <p className="text-gray-600 text-sm dark:text-gray-400">
           Connect your wallet to view subscription
         </p>
       </div>
@@ -80,11 +83,11 @@ export function SubscriptionCard() {
 
   if (isLoading) {
     return (
-      <div className="p-6 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 animate-pulse">
-        <div className="h-6 bg-gray-300 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
+      <div className="animate-pulse rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+        <div className="mb-4 h-6 w-1/3 rounded bg-gray-300 dark:bg-gray-700" />
         <div className="space-y-2">
-          <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-full"></div>
-          <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-2/3"></div>
+          <div className="h-4 w-full rounded bg-gray-300 dark:bg-gray-700" />
+          <div className="h-4 w-2/3 rounded bg-gray-300 dark:bg-gray-700" />
         </div>
       </div>
     );
@@ -95,147 +98,166 @@ export function SubscriptionCard() {
   const features = PLAN_FEATURES[plan];
 
   const handleCancel = async () => {
-    if (!confirm('Are you sure you want to cancel your subscription? You will still have access until the end of your billing period.')) {
+    if (
+      !confirm(
+        "Are you sure you want to cancel your subscription? You will still have access until the end of your billing period."
+      )
+    ) {
       return;
     }
 
     try {
       await cancel();
-      alert('Subscription cancelled successfully!');
+      alert("Subscription cancelled successfully!");
       setShowManageModal(false);
     } catch (error: any) {
-      console.error('Failed to cancel subscription:', error);
-      alert(`Failed to cancel subscription: ${error?.message || 'Unknown error'}`);
+      console.error("Failed to cancel subscription:", error);
+      alert(
+        `Failed to cancel subscription: ${error?.message || "Unknown error"}`
+      );
     }
   };
 
   return (
     <>
-    <div className="p-6 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold">{planName} Plan</h3>
-        <SubscriptionBadge />
-      </div>
-
-      {/* Status */}
-      <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-900 rounded">
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-gray-600 dark:text-gray-400">Status:</span>
-          <span className={`font-medium ${isActive ? 'text-green-600' : 'text-red-600'}`}>
-            {isActive ? 'Active' : 'Inactive'}
-          </span>
+      <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="font-semibold text-lg">{planName} Plan</h3>
+          <SubscriptionBadge />
         </div>
 
-        {isActive && subscription?.expiresAt && (
-          <div className="flex items-center justify-between text-sm mt-2">
-            <span className="text-gray-600 dark:text-gray-400">Expires:</span>
-            <span className="font-medium">
-              {new Date(subscription.expiresAt * 1000).toLocaleDateString()}
-              {daysLeft > 0 && ` (${daysLeft} days)`}
+        {/* Status */}
+        <div className="mb-4 rounded bg-gray-50 p-3 dark:bg-gray-900">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-600 dark:text-gray-400">Status:</span>
+            <span
+              className={`font-medium ${isActive ? "text-green-600" : "text-red-600"}`}
+            >
+              {isActive ? "Active" : "Inactive"}
             </span>
           </div>
-        )}
-      </div>
 
-      {/* Features */}
-      <div className="space-y-2">
-        <h4 className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-          Plan Features:
-        </h4>
-        <ul className="space-y-1 text-sm">
-          <li className="flex items-center gap-2">
-            <span className="text-green-500">✓</span>
-            <span>
-              {features.messages === Infinity
-                ? 'Unlimited messages'
-                : `${features.messages} messages/day`}
-            </span>
-          </li>
-          <li className="flex items-center gap-2">
-            <span className="text-green-500">✓</span>
-            <span>{features.storage} storage</span>
-          </li>
-          <li className="flex items-center gap-2">
-            <span className="text-green-500">✓</span>
-            <span>{features.history} history</span>
-          </li>
-          <li className="flex items-center gap-2">
-            <span className="text-green-500">✓</span>
-            <span>{features.models.join(', ')}</span>
-          </li>
-        </ul>
-      </div>
+          {isActive && subscription?.expiresAt && (
+            <div className="mt-2 flex items-center justify-between text-sm">
+              <span className="text-gray-600 dark:text-gray-400">Expires:</span>
+              <span className="font-medium">
+                {new Date(subscription.expiresAt * 1000).toLocaleDateString()}
+                {daysLeft > 0 && ` (${daysLeft} days)`}
+              </span>
+            </div>
+          )}
+        </div>
 
-      {/* Action Buttons */}
-      <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-        {plan === SubscriptionPlan.FREE || !isActive ? (
-          <a
-            href="/pricing"
-            className="block w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-center rounded-lg font-medium transition-colors"
-          >
-            Upgrade Plan
-          </a>
-        ) : (
-          <div className="flex gap-2">
+        {/* Features */}
+        <div className="space-y-2">
+          <h4 className="font-semibold text-gray-600 text-sm dark:text-gray-400">
+            Plan Features:
+          </h4>
+          <ul className="space-y-1 text-sm">
+            <li className="flex items-center gap-2">
+              <span className="text-green-500">✓</span>
+              <span>
+                {features.messages === Number.POSITIVE_INFINITY
+                  ? "Unlimited messages"
+                  : `${features.messages} messages/day`}
+              </span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-green-500">✓</span>
+              <span>{features.storage} storage</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-green-500">✓</span>
+              <span>{features.history} history</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-green-500">✓</span>
+              <span>{features.models.join(", ")}</span>
+            </li>
+          </ul>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="mt-6 border-gray-200 border-t pt-4 dark:border-gray-700">
+          {plan === SubscriptionPlan.FREE || !isActive ? (
             <a
+              className="block w-full rounded-lg bg-blue-600 px-4 py-2 text-center font-medium text-white transition-colors hover:bg-blue-700"
               href="/pricing"
-              className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-center rounded-lg font-medium transition-colors"
             >
-              Extend
+              Upgrade Plan
             </a>
-            <button
-              onClick={() => setShowManageModal(true)}
-              className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-center rounded-lg font-medium transition-colors"
-            >
-              Manage
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-
-    {/* Manage Subscription Modal */}
-    {showManageModal && (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowManageModal(false)}>
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
-          <h3 className="text-xl font-bold mb-4">Manage Subscription</h3>
-
-          <div className="mb-6">
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              You are currently on the <strong>{planName}</strong> plan.
-            </p>
-
-            {isActive && subscription?.expiresAt && (
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Your subscription will expire on{' '}
-                <strong>{new Date(subscription.expiresAt * 1000).toLocaleDateString()}</strong>
-                {daysLeft > 0 && ` (${daysLeft} days left)`}.
-              </p>
-            )}
-
-            <p className="text-sm text-gray-500 dark:text-gray-500 mb-4">
-              Canceling will stop auto-renewal but you'll keep access until the end of your billing period.
-            </p>
-          </div>
-
-          <div className="flex gap-2">
-            <button
-              onClick={handleCancel}
-              disabled={isCancelling}
-              className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isCancelling ? 'Cancelling...' : 'Cancel Subscription'}
-            </button>
-            <button
-              onClick={() => setShowManageModal(false)}
-              className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-colors"
-            >
-              Close
-            </button>
-          </div>
+          ) : (
+            <div className="flex gap-2">
+              <a
+                className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-center font-medium text-white transition-colors hover:bg-blue-700"
+                href="/pricing"
+              >
+                Extend
+              </a>
+              <button
+                className="flex-1 rounded-lg bg-gray-200 px-4 py-2 text-center font-medium text-gray-700 transition-colors hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                onClick={() => setShowManageModal(true)}
+              >
+                Manage
+              </button>
+            </div>
+          )}
         </div>
       </div>
-    )}
+
+      {/* Manage Subscription Modal */}
+      {showManageModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+          onClick={() => setShowManageModal(false)}
+        >
+          <div
+            className="mx-4 w-full max-w-md rounded-lg bg-white p-6 dark:bg-gray-800"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="mb-4 font-bold text-xl">Manage Subscription</h3>
+
+            <div className="mb-6">
+              <p className="mb-4 text-gray-600 dark:text-gray-400">
+                You are currently on the <strong>{planName}</strong> plan.
+              </p>
+
+              {isActive && subscription?.expiresAt && (
+                <p className="mb-4 text-gray-600 dark:text-gray-400">
+                  Your subscription will expire on{" "}
+                  <strong>
+                    {new Date(
+                      subscription.expiresAt * 1000
+                    ).toLocaleDateString()}
+                  </strong>
+                  {daysLeft > 0 && ` (${daysLeft} days left)`}.
+                </p>
+              )}
+
+              <p className="mb-4 text-gray-500 text-sm dark:text-gray-500">
+                Canceling will stop auto-renewal but you'll keep access until
+                the end of your billing period.
+              </p>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                className="flex-1 rounded-lg bg-red-600 px-4 py-2 font-medium text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={isCancelling}
+                onClick={handleCancel}
+              >
+                {isCancelling ? "Cancelling..." : "Cancel Subscription"}
+              </button>
+              <button
+                className="flex-1 rounded-lg bg-gray-200 px-4 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                onClick={() => setShowManageModal(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -253,8 +275,8 @@ export function InlineSubscriptionStatus() {
   const planName = getPlanName(plan);
 
   return (
-    <div className="flex items-center justify-between px-4 py-2 bg-gray-50 dark:bg-gray-900 rounded">
-      <span className="text-xs text-gray-600 dark:text-gray-400">Plan:</span>
+    <div className="flex items-center justify-between rounded bg-gray-50 px-4 py-2 dark:bg-gray-900">
+      <span className="text-gray-600 text-xs dark:text-gray-400">Plan:</span>
       <SubscriptionBadge />
     </div>
   );

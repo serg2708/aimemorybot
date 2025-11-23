@@ -19,7 +19,7 @@ export default async function Layout({
         src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"
         strategy="beforeInteractive"
       />
-      <ChatLayoutWrapper user={session?.user} isCollapsed={isCollapsed}>
+      <ChatLayoutWrapper isCollapsed={isCollapsed} user={session?.user}>
         {children}
       </ChatLayoutWrapper>
     </>

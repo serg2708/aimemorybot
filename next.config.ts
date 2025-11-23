@@ -18,7 +18,15 @@ const nextConfig: NextConfig = {
   },
   webpack: (config, { isServer, webpack }) => {
     // Ignore React Native dependencies for web builds
-    if (!isServer) {
+    if (isServer) {
+      // Server-side fallbacks (minimal)
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      };
+    } else {
       config.plugins.push(
         new webpack.IgnorePlugin({
           resourceRegExp: /^@react-native-async-storage\/async-storage$/,
@@ -35,38 +43,30 @@ const nextConfig: NextConfig = {
         net: false,
         tls: false,
         // Don't disable crypto - it's needed for Web3
-        crypto: require.resolve('crypto-browserify'),
-        stream: require.resolve('stream-browserify'),
-        http: require.resolve('stream-http'),
-        https: require.resolve('https-browserify'),
-        os: require.resolve('os-browserify/browser'),
-        buffer: require.resolve('buffer/'),
+        crypto: require.resolve("crypto-browserify"),
+        stream: require.resolve("stream-browserify"),
+        http: require.resolve("stream-http"),
+        https: require.resolve("https-browserify"),
+        os: require.resolve("os-browserify/browser"),
+        buffer: require.resolve("buffer/"),
       };
 
       // Provide Buffer globally for Web3 libraries
       config.plugins.push(
         new webpack.ProvidePlugin({
-          Buffer: ['buffer', 'Buffer'],
-          process: 'process/browser',
+          Buffer: ["buffer", "Buffer"],
+          process: "process/browser",
         })
       );
-    } else {
-      // Server-side fallbacks (minimal)
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-      };
     }
 
     // Alias React Native modules to empty modules
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@react-native-async-storage/async-storage': false,
-      'react-native': false,
-      'react-native-device-info': false,
-      'react-native-randombytes': false,
+      "@react-native-async-storage/async-storage": false,
+      "react-native": false,
+      "react-native-device-info": false,
+      "react-native-randombytes": false,
     };
 
     return config;

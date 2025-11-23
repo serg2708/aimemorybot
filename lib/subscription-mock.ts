@@ -4,17 +4,17 @@
  * To enable: Set NEXT_PUBLIC_MOCK_SUBSCRIPTION=true in .env.local
  */
 
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useAccount } from 'wagmi';
-import { SubscriptionPlan, type SubscriptionData } from './contract';
+import { useEffect, useState } from "react";
+import { useAccount } from "wagmi";
+import { type SubscriptionData, SubscriptionPlan } from "./contract";
 
 /**
  * Safe localStorage access (only in browser)
  */
 const getLocalStorage = () => {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     return window.localStorage;
   }
   return null;
@@ -25,7 +25,9 @@ const getLocalStorage = () => {
  */
 export function useMockSubscription() {
   const { address } = useAccount();
-  const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
+  const [subscription, setSubscription] = useState<SubscriptionData | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -47,7 +49,7 @@ export function useMockSubscription() {
             const data = JSON.parse(stored);
             setSubscription(data);
           } catch (error) {
-            console.error('Failed to parse stored subscription:', error);
+            console.error("Failed to parse stored subscription:", error);
             setSubscription({
               plan: SubscriptionPlan.FREE,
               expiresAt: 0,
@@ -98,16 +100,16 @@ export function useMockSubscribe() {
 
   const subscribe = async (
     plan: SubscriptionPlan,
-    duration: 'monthly' | 'yearly',
+    duration: "monthly" | "yearly",
     value: bigint
   ) => {
     if (!address) {
-      throw new Error('Wallet not connected');
+      throw new Error("Wallet not connected");
     }
 
     const storage = getLocalStorage();
     if (!storage) {
-      throw new Error('localStorage not available');
+      throw new Error("localStorage not available");
     }
 
     setIsPending(true);
@@ -116,12 +118,11 @@ export function useMockSubscribe() {
 
     try {
       // Simulate transaction delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Calculate expiration
-      const durationSeconds = duration === 'monthly'
-        ? 30 * 24 * 60 * 60
-        : 365 * 24 * 60 * 60;
+      const durationSeconds =
+        duration === "monthly" ? 30 * 24 * 60 * 60 : 365 * 24 * 60 * 60;
       const expiresAt = Math.floor(Date.now() / 1000) + durationSeconds;
 
       // Store subscription
@@ -131,25 +132,28 @@ export function useMockSubscribe() {
         isActive: true,
       };
 
-      storage.setItem(`mock_subscription_${address}`, JSON.stringify(subscription));
+      storage.setItem(
+        `mock_subscription_${address}`,
+        JSON.stringify(subscription)
+      );
 
       setIsPending(false);
       setIsConfirming(true);
 
       // Simulate confirmation delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       setIsConfirming(false);
       setIsSuccess(true);
 
       // Reload page to update subscription status
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         setTimeout(() => {
           window.location.reload();
         }, 1500);
       }
 
-      return { hash: '0xmock' + Math.random().toString(36).substring(2) };
+      return { hash: "0xmock" + Math.random().toString(36).substring(2) };
     } catch (err: any) {
       setError(err);
       setIsPending(false);
@@ -178,14 +182,14 @@ export function useMockExtendSubscription() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const extend = async (duration: 'monthly' | 'yearly', value: bigint) => {
+  const extend = async (duration: "monthly" | "yearly", value: bigint) => {
     if (!address) {
-      throw new Error('Wallet not connected');
+      throw new Error("Wallet not connected");
     }
 
     const storage = getLocalStorage();
     if (!storage) {
-      throw new Error('localStorage not available');
+      throw new Error("localStorage not available");
     }
 
     setIsPending(true);
@@ -196,21 +200,21 @@ export function useMockExtendSubscription() {
       // Load current subscription
       const stored = storage.getItem(`mock_subscription_${address}`);
       if (!stored) {
-        throw new Error('No subscription to extend');
+        throw new Error("No subscription to extend");
       }
 
       const current: SubscriptionData = JSON.parse(stored);
 
       // Simulate transaction delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Calculate new expiration
-      const durationSeconds = duration === 'monthly'
-        ? 30 * 24 * 60 * 60
-        : 365 * 24 * 60 * 60;
+      const durationSeconds =
+        duration === "monthly" ? 30 * 24 * 60 * 60 : 365 * 24 * 60 * 60;
 
       const now = Math.floor(Date.now() / 1000);
-      const newExpiresAt = (current.expiresAt > now ? current.expiresAt : now) + durationSeconds;
+      const newExpiresAt =
+        (current.expiresAt > now ? current.expiresAt : now) + durationSeconds;
 
       // Update subscription
       const subscription: SubscriptionData = {
@@ -219,25 +223,28 @@ export function useMockExtendSubscription() {
         isActive: true,
       };
 
-      storage.setItem(`mock_subscription_${address}`, JSON.stringify(subscription));
+      storage.setItem(
+        `mock_subscription_${address}`,
+        JSON.stringify(subscription)
+      );
 
       setIsPending(false);
       setIsConfirming(true);
 
       // Simulate confirmation delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       setIsConfirming(false);
       setIsSuccess(true);
 
       // Reload page to update subscription status
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         setTimeout(() => {
           window.location.reload();
         }, 1500);
       }
 
-      return { hash: '0xmock' + Math.random().toString(36).substring(2) };
+      return { hash: "0xmock" + Math.random().toString(36).substring(2) };
     } catch (err: any) {
       setError(err);
       setIsPending(false);
@@ -268,12 +275,12 @@ export function useMockCancelSubscription() {
 
   const cancel = async () => {
     if (!address) {
-      throw new Error('Wallet not connected');
+      throw new Error("Wallet not connected");
     }
 
     const storage = getLocalStorage();
     if (!storage) {
-      throw new Error('localStorage not available');
+      throw new Error("localStorage not available");
     }
 
     setIsPending(true);
@@ -282,7 +289,7 @@ export function useMockCancelSubscription() {
 
     try {
       // Simulate transaction delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
       // Remove subscription
       storage.removeItem(`mock_subscription_${address}`);
@@ -291,19 +298,19 @@ export function useMockCancelSubscription() {
       setIsConfirming(true);
 
       // Simulate confirmation delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       setIsConfirming(false);
       setIsSuccess(true);
 
       // Reload page to update subscription status
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         setTimeout(() => {
           window.location.reload();
         }, 1500);
       }
 
-      return { hash: '0xmock' + Math.random().toString(36).substring(2) };
+      return { hash: "0xmock" + Math.random().toString(36).substring(2) };
     } catch (err: any) {
       setError(err);
       setIsPending(false);

@@ -3,21 +3,21 @@
  * Supports JSON, Markdown, and PDF formats
  */
 
-'use client';
+"use client";
 
-import { ChatSession } from './chat-persistence';
+import type { ChatSession } from "./chat-persistence";
+import { handleError } from "./error-handling";
 import {
-  notifyExportStarted,
   notifyExportCompleted,
   notifyExportFailed,
+  notifyExportStarted,
   notifySuccess,
-} from './notifications';
-import { handleError } from './error-handling';
+} from "./notifications";
 
 /**
  * Export format types
  */
-export type ExportFormat = 'json' | 'markdown' | 'txt';
+export type ExportFormat = "json" | "markdown" | "txt";
 
 /**
  * Export chat to JSON
@@ -34,16 +34,16 @@ export function exportToMarkdown(chat: ChatSession): string {
 
   // Header
   lines.push(`# ${chat.title}`);
-  lines.push('');
+  lines.push("");
   lines.push(`Created: ${new Date(chat.createdAt).toLocaleString()}`);
   lines.push(`Last Updated: ${new Date(chat.updatedAt).toLocaleString()}`);
   lines.push(`Messages: ${chat.messages.length}`);
   if (chat.cid) {
     lines.push(`CID: ${chat.cid}`);
   }
-  lines.push('');
-  lines.push('---');
-  lines.push('');
+  lines.push("");
+  lines.push("---");
+  lines.push("");
 
   // Messages
   chat.messages.forEach((message, index) => {
@@ -51,17 +51,17 @@ export function exportToMarkdown(chat: ChatSession): string {
     const timestamp = new Date(message.timestamp).toLocaleString();
 
     lines.push(`## ${role} (${timestamp})`);
-    lines.push('');
+    lines.push("");
     lines.push(message.content);
-    lines.push('');
+    lines.push("");
 
     if (index < chat.messages.length - 1) {
-      lines.push('---');
-      lines.push('');
+      lines.push("---");
+      lines.push("");
     }
   });
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
@@ -72,17 +72,17 @@ export function exportToText(chat: ChatSession): string {
 
   // Header
   lines.push(`${chat.title}`);
-  lines.push('='.repeat(chat.title.length));
-  lines.push('');
+  lines.push("=".repeat(chat.title.length));
+  lines.push("");
   lines.push(`Created: ${new Date(chat.createdAt).toLocaleString()}`);
   lines.push(`Last Updated: ${new Date(chat.updatedAt).toLocaleString()}`);
   lines.push(`Messages: ${chat.messages.length}`);
   if (chat.cid) {
     lines.push(`CID: ${chat.cid}`);
   }
-  lines.push('');
-  lines.push('-'.repeat(50));
-  lines.push('');
+  lines.push("");
+  lines.push("-".repeat(50));
+  lines.push("");
 
   // Messages
   chat.messages.forEach((message) => {
@@ -91,19 +91,23 @@ export function exportToText(chat: ChatSession): string {
 
     lines.push(`[${role}] ${timestamp}`);
     lines.push(message.content);
-    lines.push('');
+    lines.push("");
   });
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
  * Download file to user's computer
  */
-function downloadFile(content: string, filename: string, mimeType: string): void {
+function downloadFile(
+  content: string,
+  filename: string,
+  mimeType: string
+): void {
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
+  const link = document.createElement("a");
 
   link.href = url;
   link.download = filename;
@@ -119,7 +123,7 @@ function downloadFile(content: string, filename: string, mimeType: string): void
  */
 export async function exportChat(
   chat: ChatSession,
-  format: ExportFormat = 'json'
+  format: ExportFormat = "json"
 ): Promise<void> {
   try {
     notifyExportStarted(format);
@@ -128,26 +132,26 @@ export async function exportChat(
     let filename: string;
     let mimeType: string;
 
-    const safeTitle = chat.title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-    const timestamp = new Date().toISOString().split('T')[0];
+    const safeTitle = chat.title.replace(/[^a-z0-9]/gi, "_").toLowerCase();
+    const timestamp = new Date().toISOString().split("T")[0];
 
     switch (format) {
-      case 'json':
+      case "json":
         content = exportToJSON(chat);
         filename = `${safeTitle}_${timestamp}.json`;
-        mimeType = 'application/json';
+        mimeType = "application/json";
         break;
 
-      case 'markdown':
+      case "markdown":
         content = exportToMarkdown(chat);
         filename = `${safeTitle}_${timestamp}.md`;
-        mimeType = 'text/markdown';
+        mimeType = "text/markdown";
         break;
 
-      case 'txt':
+      case "txt":
         content = exportToText(chat);
         filename = `${safeTitle}_${timestamp}.txt`;
-        mimeType = 'text/plain';
+        mimeType = "text/plain";
         break;
 
       default:
@@ -157,9 +161,9 @@ export async function exportChat(
     downloadFile(content, filename, mimeType);
     notifyExportCompleted();
   } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+    const errorMsg = error instanceof Error ? error.message : "Unknown error";
     notifyExportFailed(errorMsg);
-    handleError(error, 'Exporting chat');
+    handleError(error, "Exporting chat");
   }
 }
 
@@ -168,22 +172,22 @@ export async function exportChat(
  */
 export async function exportMultipleChats(
   chats: ChatSession[],
-  format: ExportFormat = 'json'
+  format: ExportFormat = "json"
 ): Promise<void> {
   try {
     notifyExportStarted(format);
 
     if (chats.length === 0) {
-      throw new Error('No chats to export');
+      throw new Error("No chats to export");
     }
 
-    const timestamp = new Date().toISOString().split('T')[0];
+    const timestamp = new Date().toISOString().split("T")[0];
 
-    if (format === 'json') {
+    if (format === "json") {
       // Export as single JSON file with all chats
       const content = JSON.stringify(chats, null, 2);
       const filename = `all_chats_${timestamp}.json`;
-      downloadFile(content, filename, 'application/json');
+      downloadFile(content, filename, "application/json");
     } else {
       // Export each chat as separate file
       for (const chat of chats) {
@@ -193,9 +197,9 @@ export async function exportMultipleChats(
 
     notifyExportCompleted();
   } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+    const errorMsg = error instanceof Error ? error.message : "Unknown error";
     notifyExportFailed(errorMsg);
-    handleError(error, 'Exporting chats');
+    handleError(error, "Exporting chats");
   }
 }
 
@@ -208,19 +212,21 @@ export function importFromJSON(jsonData: string): ChatSession {
 
     // Validate required fields
     if (!parsed.id || !Array.isArray(parsed.messages)) {
-      throw new Error('Invalid chat data: missing required fields');
+      throw new Error("Invalid chat data: missing required fields");
     }
 
     // Ensure all messages have required fields
     for (const message of parsed.messages) {
       if (!message.id || !message.role || !message.content) {
-        throw new Error('Invalid message data: missing required fields');
+        throw new Error("Invalid message data: missing required fields");
       }
     }
 
     return parsed as ChatSession;
   } catch (error) {
-    throw new Error(`Failed to import chat: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `Failed to import chat: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
   }
 }
 
@@ -239,12 +245,14 @@ export function importMultipleFromJSON(jsonData: string): ChatSession[] {
     // Multiple chats
     return parsed.map((chatData) => {
       if (!chatData.id || !Array.isArray(chatData.messages)) {
-        throw new Error('Invalid chat data in array');
+        throw new Error("Invalid chat data in array");
       }
       return chatData as ChatSession;
     });
   } catch (error) {
-    throw new Error(`Failed to import chats: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `Failed to import chats: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
   }
 }
 
@@ -253,8 +261,8 @@ export function importMultipleFromJSON(jsonData: string): ChatSession[] {
  */
 export async function handleFileImport(file: File): Promise<ChatSession[]> {
   try {
-    if (!file.name.endsWith('.json')) {
-      throw new Error('Only JSON files are supported for import');
+    if (!file.name.endsWith(".json")) {
+      throw new Error("Only JSON files are supported for import");
     }
 
     const text = await file.text();
@@ -263,8 +271,8 @@ export async function handleFileImport(file: File): Promise<ChatSession[]> {
     notifySuccess(`Successfully imported ${chats.length} chat(s)`);
     return chats;
   } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-    handleError(error, 'Importing file');
+    const errorMsg = error instanceof Error ? error.message : "Unknown error";
+    handleError(error, "Importing file");
     throw error;
   }
 }
@@ -274,31 +282,31 @@ export async function handleFileImport(file: File): Promise<ChatSession[]> {
  */
 export async function exportAllData(): Promise<void> {
   try {
-    notifyExportStarted('json');
+    notifyExportStarted("json");
 
     const data = {
-      version: '1.0',
+      version: "1.0",
       exportDate: new Date().toISOString(),
       chats: [] as ChatSession[],
       // Can add more data here: settings, preferences, etc.
     };
 
     // Get all chats from localStorage
-    const storedChats = localStorage.getItem('ai_memory_box_chats');
+    const storedChats = localStorage.getItem("ai_memory_box_chats");
     if (storedChats) {
       data.chats = JSON.parse(storedChats);
     }
 
     const content = JSON.stringify(data, null, 2);
-    const timestamp = new Date().toISOString().split('T')[0];
+    const timestamp = new Date().toISOString().split("T")[0];
     const filename = `ai_memory_box_backup_${timestamp}.json`;
 
-    downloadFile(content, filename, 'application/json');
+    downloadFile(content, filename, "application/json");
     notifyExportCompleted();
   } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+    const errorMsg = error instanceof Error ? error.message : "Unknown error";
     notifyExportFailed(errorMsg);
-    handleError(error, 'Exporting all data');
+    handleError(error, "Exporting all data");
   }
 }
 
@@ -314,7 +322,7 @@ export async function importAllData(file: File): Promise<{
     const data = JSON.parse(text);
 
     if (!data.version || !data.chats) {
-      throw new Error('Invalid backup file format');
+      throw new Error("Invalid backup file format");
     }
 
     notifySuccess(`Successfully imported backup (${data.chats.length} chats)`);
@@ -324,8 +332,8 @@ export async function importAllData(file: File): Promise<{
       version: data.version,
     };
   } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-    handleError(error, 'Importing backup');
+    const errorMsg = error instanceof Error ? error.message : "Unknown error";
+    handleError(error, "Importing backup");
     throw error;
   }
 }

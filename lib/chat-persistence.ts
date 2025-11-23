@@ -3,19 +3,23 @@
  * Handles automatic backup of chat history to Autonomys DSN
  */
 
-'use client';
+"use client";
 
-import { uploadToAutoDrive, downloadFromAutoDrive } from './auto-drive';
-import { notifyChatSaved, notifyChatLoaded, notifyError } from './notifications';
-import { retryDSNOperation, handleError } from './error-handling';
-import { encryptData, decryptData, isEncryptionAvailable } from './encryption';
+import { downloadFromAutoDrive, uploadToAutoDrive } from "./auto-drive";
+import { decryptData, encryptData, isEncryptionAvailable } from "./encryption";
+import { handleError, retryDSNOperation } from "./error-handling";
+import {
+  notifyChatLoaded,
+  notifyChatSaved,
+  notifyError,
+} from "./notifications";
 
 /**
  * Chat message interface
  */
 export interface ChatMessage {
   id: string;
-  role: 'user' | 'assistant' | 'system';
+  role: "user" | "assistant" | "system";
   content: string;
   timestamp: number;
   metadata?: Record<string, any>;
@@ -38,9 +42,9 @@ export interface ChatSession {
  * Storage keys
  */
 const STORAGE_KEYS = {
-  CHATS: 'ai_memory_box_chats',
-  LAST_SYNC: 'ai_memory_box_last_sync',
-  CID_MAP: 'ai_memory_box_cid_map', // Maps chat IDs to CIDs
+  CHATS: "ai_memory_box_chats",
+  LAST_SYNC: "ai_memory_box_last_sync",
+  CID_MAP: "ai_memory_box_cid_map", // Maps chat IDs to CIDs
 };
 
 /**
@@ -49,7 +53,7 @@ const STORAGE_KEYS = {
 const AUTO_SAVE_CONFIG = {
   enabled: true,
   debounceMs: 5000, // Save 5 seconds after last change
-  syncIntervalMs: 60000, // Sync to DSN every minute
+  syncIntervalMs: 60_000, // Sync to DSN every minute
 };
 
 // Debounce timers (using ReturnType for browser compatibility)
@@ -60,13 +64,13 @@ let syncTimer: ReturnType<typeof setTimeout> | null = null;
  * Get all chats from local storage
  */
 export function getLocalChats(): ChatSession[] {
-  if (typeof window === 'undefined') return [];
+  if (typeof window === "undefined") return [];
 
   try {
     const stored = localStorage.getItem(STORAGE_KEYS.CHATS);
     return stored ? JSON.parse(stored) : [];
   } catch (error) {
-    console.error('Failed to load chats from local storage:', error);
+    console.error("Failed to load chats from local storage:", error);
     return [];
   }
 }
@@ -75,12 +79,12 @@ export function getLocalChats(): ChatSession[] {
  * Save chats to local storage
  */
 export function saveLocalChats(chats: ChatSession[]): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   try {
     localStorage.setItem(STORAGE_KEYS.CHATS, JSON.stringify(chats));
   } catch (error) {
-    console.error('Failed to save chats to local storage:', error);
+    console.error("Failed to save chats to local storage:", error);
   }
 }
 
@@ -95,7 +99,7 @@ export function getChatById(chatId: string): ChatSession | null {
 /**
  * Save or update chat (auto-saves to DSN with debounce)
  */
-export function saveChat(chat: ChatSession, autoSaveToDSN: boolean = true): void {
+export function saveChat(chat: ChatSession, autoSaveToDSN = true): void {
   const chats = getLocalChats();
   const index = chats.findIndex((c) => c.id === chat.id);
 
@@ -111,7 +115,7 @@ export function saveChat(chat: ChatSession, autoSaveToDSN: boolean = true): void
   }
 
   saveLocalChats(chats);
-  notifyChatSaved('local');
+  notifyChatSaved("local");
 
   // Schedule DSN save with debounce
   if (autoSaveToDSN && AUTO_SAVE_CONFIG.enabled) {
@@ -135,7 +139,7 @@ export async function saveChatToDSN(
   try {
     const chat = getChatById(chatId);
     if (!chat) {
-      throw new Error('Chat not found');
+      throw new Error("Chat not found");
     }
 
     // Prepare data
@@ -146,9 +150,9 @@ export async function saveChatToDSN(
       const encrypted = await encryptData(data, address);
       if (encrypted) {
         data = encrypted;
-        console.log('Chat encrypted before upload to DSN');
+        console.log("Chat encrypted before upload to DSN");
       } else {
-        console.warn('Encryption failed, uploading unencrypted');
+        console.warn("Encryption failed, uploading unencrypted");
       }
     }
 
@@ -160,7 +164,7 @@ export async function saveChatToDSN(
     });
 
     if (!cid) {
-      throw new Error('Failed to upload to DSN');
+      throw new Error("Failed to upload to DSN");
     }
 
     // Update chat with CID
@@ -174,10 +178,10 @@ export async function saveChatToDSN(
     // Store CID mapping
     storeCIDMapping(chatId, cid);
 
-    notifyChatSaved('dsn');
+    notifyChatSaved("dsn");
     return cid;
   } catch (error) {
-    handleError(error, 'Saving chat to DSN');
+    handleError(error, "Saving chat to DSN");
     return null;
   }
 }
@@ -192,7 +196,7 @@ export async function loadChatFromDSN(
   try {
     let data = await downloadFromAutoDrive(cid);
     if (!data) {
-      throw new Error('Failed to download from DSN');
+      throw new Error("Failed to download from DSN");
     }
 
     // Try to decrypt if address is provided
@@ -201,10 +205,10 @@ export async function loadChatFromDSN(
         const decrypted = await decryptData(data, address);
         if (decrypted) {
           data = decrypted;
-          console.log('Chat decrypted after download from DSN');
+          console.log("Chat decrypted after download from DSN");
         }
       } catch (decryptError) {
-        console.warn('Decryption failed, assuming unencrypted data');
+        console.warn("Decryption failed, assuming unencrypted data");
       }
     }
 
@@ -213,10 +217,10 @@ export async function loadChatFromDSN(
     // Save to local storage
     saveChat(chat, false); // Don't trigger auto-save to DSN
 
-    notifyChatLoaded('dsn');
+    notifyChatLoaded("dsn");
     return chat;
   } catch (error) {
-    handleError(error, 'Loading chat from DSN');
+    handleError(error, "Loading chat from DSN");
     return null;
   }
 }
@@ -225,16 +229,16 @@ export async function loadChatFromDSN(
  * Store CID mapping for chat ID
  */
 function storeCIDMapping(chatId: string, cid: string): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   try {
     const mappings = JSON.parse(
-      localStorage.getItem(STORAGE_KEYS.CID_MAP) || '{}'
+      localStorage.getItem(STORAGE_KEYS.CID_MAP) || "{}"
     );
     mappings[chatId] = cid;
     localStorage.setItem(STORAGE_KEYS.CID_MAP, JSON.stringify(mappings));
   } catch (error) {
-    console.error('Failed to store CID mapping:', error);
+    console.error("Failed to store CID mapping:", error);
   }
 }
 
@@ -242,15 +246,15 @@ function storeCIDMapping(chatId: string, cid: string): void {
  * Get CID for chat ID
  */
 export function getCIDForChat(chatId: string): string | null {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === "undefined") return null;
 
   try {
     const mappings = JSON.parse(
-      localStorage.getItem(STORAGE_KEYS.CID_MAP) || '{}'
+      localStorage.getItem(STORAGE_KEYS.CID_MAP) || "{}"
     );
     return mappings[chatId] || null;
   } catch (error) {
-    console.error('Failed to get CID mapping:', error);
+    console.error("Failed to get CID mapping:", error);
     return null;
   }
 }
@@ -270,11 +274,11 @@ export async function syncAllChatsToDSN(address?: string): Promise<void> {
     }
 
     // Update last sync time
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       localStorage.setItem(STORAGE_KEYS.LAST_SYNC, Date.now().toString());
     }
   } catch (error) {
-    handleError(error, 'Syncing chats to DSN');
+    handleError(error, "Syncing chats to DSN");
   }
 }
 
@@ -282,11 +286,11 @@ export async function syncAllChatsToDSN(address?: string): Promise<void> {
  * Get last sync timestamp
  */
 export function getLastSyncTime(): number | null {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === "undefined") return null;
 
   try {
     const lastSync = localStorage.getItem(STORAGE_KEYS.LAST_SYNC);
-    return lastSync ? parseInt(lastSync, 10) : null;
+    return lastSync ? Number.parseInt(lastSync, 10) : null;
   } catch {
     return null;
   }
@@ -326,15 +330,15 @@ export function deleteChat(chatId: string): void {
   saveLocalChats(filtered);
 
   // Clear CID mapping
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     try {
       const mappings = JSON.parse(
-        localStorage.getItem(STORAGE_KEYS.CID_MAP) || '{}'
+        localStorage.getItem(STORAGE_KEYS.CID_MAP) || "{}"
       );
       delete mappings[chatId];
       localStorage.setItem(STORAGE_KEYS.CID_MAP, JSON.stringify(mappings));
     } catch (error) {
-      console.error('Failed to delete CID mapping:', error);
+      console.error("Failed to delete CID mapping:", error);
     }
   }
 
@@ -364,7 +368,7 @@ export function importChatFromJSON(jsonData: string): ChatSession | null {
 
     // Validate required fields
     if (!chat.id || !chat.messages || !Array.isArray(chat.messages)) {
-      throw new Error('Invalid chat data');
+      throw new Error("Invalid chat data");
     }
 
     // Save imported chat
@@ -372,7 +376,7 @@ export function importChatFromJSON(jsonData: string): ChatSession | null {
 
     return chat;
   } catch (error) {
-    handleError(error, 'Importing chat');
+    handleError(error, "Importing chat");
     return null;
   }
 }
@@ -387,7 +391,10 @@ export function getStorageStats(): {
   lastSync: number | null;
 } {
   const chats = getLocalChats();
-  const totalMessages = chats.reduce((sum, chat) => sum + chat.messages.length, 0);
+  const totalMessages = chats.reduce(
+    (sum, chat) => sum + chat.messages.length,
+    0
+  );
   const chatsWithDSN = chats.filter((chat) => chat.cid).length;
   const lastSync = getLastSyncTime();
 

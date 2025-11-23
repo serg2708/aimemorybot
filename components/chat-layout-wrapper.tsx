@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import type { ReactNode } from 'react';
-import { DataStreamProvider } from '@/components/data-stream-provider';
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/app-sidebar';
-import type { User } from 'next-auth';
+import type { User } from "next-auth";
+import type { ReactNode } from "react";
+import { AppSidebar } from "@/components/app-sidebar";
+import { DataStreamProvider } from "@/components/data-stream-provider";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 interface ChatLayoutWrapperProps {
   children: ReactNode;
@@ -12,7 +12,11 @@ interface ChatLayoutWrapperProps {
   isCollapsed: boolean;
 }
 
-export function ChatLayoutWrapper({ children, user, isCollapsed }: ChatLayoutWrapperProps) {
+export function ChatLayoutWrapper({
+  children,
+  user,
+  isCollapsed,
+}: ChatLayoutWrapperProps) {
   return (
     <DataStreamProvider>
       <SidebarProvider defaultOpen={!isCollapsed}>

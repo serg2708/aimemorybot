@@ -3,7 +3,7 @@
  * Handles subscription payments and verification
  */
 
-import { type Address, parseEther, encodeFunctionData } from 'viem';
+import { type Address, encodeFunctionData, parseEther } from "viem";
 
 /**
  * Subscription contract ABI (simplified)
@@ -11,63 +11,63 @@ import { type Address, parseEther, encodeFunctionData } from 'viem';
  */
 export const SUBSCRIPTION_ABI = [
   {
-    name: 'subscribe',
-    type: 'function',
-    stateMutability: 'payable',
+    name: "subscribe",
+    type: "function",
+    stateMutability: "payable",
     inputs: [
-      { name: 'plan', type: 'uint8' },
-      { name: 'duration', type: 'uint256' },
+      { name: "plan", type: "uint8" },
+      { name: "duration", type: "uint256" },
     ],
     outputs: [],
   },
   {
-    name: 'extendSubscription',
-    type: 'function',
-    stateMutability: 'payable',
-    inputs: [{ name: 'duration', type: 'uint256' }],
+    name: "extendSubscription",
+    type: "function",
+    stateMutability: "payable",
+    inputs: [{ name: "duration", type: "uint256" }],
     outputs: [],
   },
   {
-    name: 'getSubscription',
-    type: 'function',
-    stateMutability: 'view',
-    inputs: [{ name: 'user', type: 'address' }],
+    name: "getSubscription",
+    type: "function",
+    stateMutability: "view",
+    inputs: [{ name: "user", type: "address" }],
     outputs: [
-      { name: 'plan', type: 'uint8' },
-      { name: 'expiresAt', type: 'uint256' },
-      { name: 'isActive', type: 'bool' },
+      { name: "plan", type: "uint8" },
+      { name: "expiresAt", type: "uint256" },
+      { name: "isActive", type: "bool" },
     ],
   },
   {
-    name: 'cancelSubscription',
-    type: 'function',
-    stateMutability: 'nonpayable',
+    name: "cancelSubscription",
+    type: "function",
+    stateMutability: "nonpayable",
     inputs: [],
     outputs: [],
   },
   {
-    name: 'Subscribed',
-    type: 'event',
+    name: "Subscribed",
+    type: "event",
     inputs: [
-      { name: 'user', type: 'address', indexed: true },
-      { name: 'plan', type: 'uint8', indexed: false },
-      { name: 'duration', type: 'uint256', indexed: false },
-      { name: 'expiresAt', type: 'uint256', indexed: false },
+      { name: "user", type: "address", indexed: true },
+      { name: "plan", type: "uint8", indexed: false },
+      { name: "duration", type: "uint256", indexed: false },
+      { name: "expiresAt", type: "uint256", indexed: false },
     ],
   },
   {
-    name: 'SubscriptionExtended',
-    type: 'event',
+    name: "SubscriptionExtended",
+    type: "event",
     inputs: [
-      { name: 'user', type: 'address', indexed: true },
-      { name: 'duration', type: 'uint256', indexed: false },
-      { name: 'newExpiresAt', type: 'uint256', indexed: false },
+      { name: "user", type: "address", indexed: true },
+      { name: "duration", type: "uint256", indexed: false },
+      { name: "newExpiresAt", type: "uint256", indexed: false },
     ],
   },
   {
-    name: 'SubscriptionCancelled',
-    type: 'event',
-    inputs: [{ name: 'user', type: 'address', indexed: true }],
+    name: "SubscriptionCancelled",
+    type: "event",
+    inputs: [{ name: "user", type: "address", indexed: true }],
   },
 ] as const;
 
@@ -76,41 +76,41 @@ export const SUBSCRIPTION_ABI = [
  */
 export const ERC20_ABI = [
   {
-    name: 'approve',
-    type: 'function',
-    stateMutability: 'nonpayable',
+    name: "approve",
+    type: "function",
+    stateMutability: "nonpayable",
     inputs: [
-      { name: 'spender', type: 'address' },
-      { name: 'amount', type: 'uint256' },
+      { name: "spender", type: "address" },
+      { name: "amount", type: "uint256" },
     ],
-    outputs: [{ name: '', type: 'bool' }],
+    outputs: [{ name: "", type: "bool" }],
   },
   {
-    name: 'allowance',
-    type: 'function',
-    stateMutability: 'view',
+    name: "allowance",
+    type: "function",
+    stateMutability: "view",
     inputs: [
-      { name: 'owner', type: 'address' },
-      { name: 'spender', type: 'address' },
+      { name: "owner", type: "address" },
+      { name: "spender", type: "address" },
     ],
-    outputs: [{ name: '', type: 'uint256' }],
+    outputs: [{ name: "", type: "uint256" }],
   },
   {
-    name: 'balanceOf',
-    type: 'function',
-    stateMutability: 'view',
-    inputs: [{ name: 'account', type: 'address' }],
-    outputs: [{ name: '', type: 'uint256' }],
+    name: "balanceOf",
+    type: "function",
+    stateMutability: "view",
+    inputs: [{ name: "account", type: "address" }],
+    outputs: [{ name: "", type: "uint256" }],
   },
   {
-    name: 'transfer',
-    type: 'function',
-    stateMutability: 'nonpayable',
+    name: "transfer",
+    type: "function",
+    stateMutability: "nonpayable",
     inputs: [
-      { name: 'recipient', type: 'address' },
-      { name: 'amount', type: 'uint256' },
+      { name: "recipient", type: "address" },
+      { name: "amount", type: "uint256" },
     ],
-    outputs: [{ name: '', type: 'bool' }],
+    outputs: [{ name: "", type: "bool" }],
   },
 ] as const;
 
@@ -148,32 +148,32 @@ export const PLAN_PRICES = {
  */
 export const PLAN_FEATURES = {
   [SubscriptionPlan.FREE]: {
-    name: 'Free',
+    name: "Free",
     messages: 10,
-    storage: '1 MB',
-    history: '7 days',
-    models: ['Claude Haiku'],
+    storage: "1 MB",
+    history: "7 days",
+    models: ["Claude Haiku"],
   },
   [SubscriptionPlan.BASIC]: {
-    name: 'Basic',
+    name: "Basic",
     messages: 100,
-    storage: '100 MB',
-    history: '30 days',
-    models: ['Claude Haiku', 'Claude Sonnet'],
+    storage: "100 MB",
+    history: "30 days",
+    models: ["Claude Haiku", "Claude Sonnet"],
   },
   [SubscriptionPlan.PRO]: {
-    name: 'Pro',
+    name: "Pro",
     messages: 1000,
-    storage: '1 GB',
-    history: 'Unlimited',
-    models: ['Claude Haiku', 'Claude Sonnet', 'Claude Opus'],
+    storage: "1 GB",
+    history: "Unlimited",
+    models: ["Claude Haiku", "Claude Sonnet", "Claude Opus"],
   },
   [SubscriptionPlan.UNLIMITED]: {
-    name: 'Unlimited',
-    messages: Infinity,
-    storage: '10 GB',
-    history: 'Unlimited',
-    models: ['All Claude Models', 'Priority Access'],
+    name: "Unlimited",
+    messages: Number.POSITIVE_INFINITY,
+    storage: "10 GB",
+    history: "Unlimited",
+    models: ["All Claude Models", "Priority Access"],
   },
 } as const;
 
@@ -189,7 +189,7 @@ export function getPlanName(plan: SubscriptionPlan): string {
  */
 export function getPlanPrice(
   plan: SubscriptionPlan,
-  duration: 'monthly' | 'yearly'
+  duration: "monthly" | "yearly"
 ): number {
   return PLAN_PRICES[plan][duration];
 }
@@ -197,20 +197,23 @@ export function getPlanPrice(
 /**
  * Convert duration to seconds
  */
-export function durationToSeconds(duration: 'monthly' | 'yearly'): bigint {
+export function durationToSeconds(duration: "monthly" | "yearly"): bigint {
   const MONTH = 30 * 24 * 60 * 60; // 30 days in seconds
   const YEAR = 365 * 24 * 60 * 60; // 365 days in seconds
 
-  return BigInt(duration === 'monthly' ? MONTH : YEAR);
+  return BigInt(duration === "monthly" ? MONTH : YEAR);
 }
 
 /**
  * Encode subscribe function data
  */
-export function encodeSubscribe(plan: SubscriptionPlan, duration: bigint): `0x${string}` {
+export function encodeSubscribe(
+  plan: SubscriptionPlan,
+  duration: bigint
+): `0x${string}` {
   return encodeFunctionData({
     abi: SUBSCRIPTION_ABI,
-    functionName: 'subscribe',
+    functionName: "subscribe",
     args: [plan, duration],
   });
 }
@@ -221,7 +224,7 @@ export function encodeSubscribe(plan: SubscriptionPlan, duration: bigint): `0x${
 export function encodeExtendSubscription(duration: bigint): `0x${string}` {
   return encodeFunctionData({
     abi: SUBSCRIPTION_ABI,
-    functionName: 'extendSubscription',
+    functionName: "extendSubscription",
     args: [duration],
   });
 }
@@ -232,7 +235,7 @@ export function encodeExtendSubscription(duration: bigint): `0x${string}` {
 export function encodeApprove(spender: Address, amount: bigint): `0x${string}` {
   return encodeFunctionData({
     abi: ERC20_ABI,
-    functionName: 'approve',
+    functionName: "approve",
     args: [spender, amount],
   });
 }
@@ -261,7 +264,9 @@ export function getDaysUntilExpiration(subscription: SubscriptionData): number {
 /**
  * Parse subscription from contract response
  */
-export function parseSubscription(data: readonly [number, bigint, boolean]): SubscriptionData {
+export function parseSubscription(
+  data: readonly [number, bigint, boolean]
+): SubscriptionData {
   return {
     plan: data[0] as SubscriptionPlan,
     expiresAt: Number(data[1]),
@@ -275,12 +280,12 @@ export function parseSubscription(data: readonly [number, bigint, boolean]): Sub
  */
 export function calculatePriceInAI3(
   plan: SubscriptionPlan,
-  duration: 'monthly' | 'yearly'
+  duration: "monthly" | "yearly"
 ): bigint {
   const priceUSD = getPlanPrice(plan, duration);
   // In production, use a price oracle to get AI3/USD rate
   // For now, assume 1 AI3 = $0.10 USD (10 AI3 = $1)
-  const ai3Price = 0.10;
+  const ai3Price = 0.1;
   const priceInAI3 = priceUSD / ai3Price;
   return parseEther(priceInAI3.toString());
 }

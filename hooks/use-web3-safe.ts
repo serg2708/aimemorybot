@@ -3,6 +3,6 @@
  * Pages using these hooks are now dynamically imported with ssr: false
  */
 
-'use client';
+"use client";
 
-export { useAccount, useBalance } from 'wagmi';
+export { useAccount, useBalance } from "wagmi";

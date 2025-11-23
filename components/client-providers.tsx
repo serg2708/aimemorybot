@@ -3,10 +3,10 @@
  * Simple re-export of Providers for use in root layout
  */
 
-'use client';
+"use client";
 
-import { Providers } from '@/components/providers';
-import type { ReactNode } from 'react';
+import type { ReactNode } from "react";
+import { Providers } from "@/components/providers";
 
 interface ClientProvidersProps {
   children: ReactNode;

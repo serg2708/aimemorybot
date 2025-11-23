@@ -3,41 +3,46 @@
  * Handles AI3 token payments only
  */
 
-'use client';
+"use client";
 
-import { parseEther, type Address } from 'viem';
-import { useAccount, useBalance, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
-import { useState } from 'react';
+import { useState } from "react";
+import { type Address, parseEther } from "viem";
 import {
-  SubscriptionPlan,
+  useAccount,
+  useBalance,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
+import {
   calculatePriceInAI3,
-} from './contract';
-import { getAI3TokenAddress, getAI3TokenName } from './web3';
-import { ERC20_ABI } from './contract';
+  ERC20_ABI,
+  type SubscriptionPlan,
+} from "./contract";
 import {
-  retryTransaction,
-  retryNetworkRequest,
   handleError,
   parseWeb3Error,
-} from './error-handling';
+  retryNetworkRequest,
+  retryTransaction,
+} from "./error-handling";
 import {
-  notifyTransactionSubmitted,
+  notifyInsufficientBalance,
   notifyTransactionConfirmed,
   notifyTransactionFailed,
-  notifyInsufficientBalance,
-} from './notifications';
+  notifyTransactionSubmitted,
+} from "./notifications";
+import { getAI3TokenAddress, getAI3TokenName } from "./web3";
 
 /**
  * Payment method types - AI3 only
  */
-export type PaymentMethod = 'AI3';
+export type PaymentMethod = "AI3";
 
 /**
  * Payment data structure
  */
 export interface PaymentData {
   plan: SubscriptionPlan;
-  duration: 'monthly' | 'yearly';
+  duration: "monthly" | "yearly";
   method: PaymentMethod;
   amount: bigint;
   recipient: Address;
@@ -67,12 +72,12 @@ export function usePayment() {
   const processPayment = async (data: PaymentData) => {
     try {
       if (!address || !chainId) {
-        throw new Error('Wallet not connected');
+        throw new Error("Wallet not connected");
       }
 
       const ai3TokenAddress = getAI3TokenAddress(chainId);
       if (!ai3TokenAddress) {
-        throw new Error('AI3 token not available on this chain');
+        throw new Error("AI3 token not available on this chain");
       }
 
       // Check balance first
@@ -80,7 +85,7 @@ export function usePayment() {
         const required = formatPaymentAmount(data.amount);
         const current = formatPaymentAmount(balance.value);
         notifyInsufficientBalance(required, current);
-        throw new Error('Insufficient balance');
+        throw new Error("Insufficient balance");
       }
 
       setPaymentData(data);
@@ -90,19 +95,18 @@ export function usePayment() {
         writeContract({
           address: ai3TokenAddress as `0x${string}`,
           abi: ERC20_ABI,
-          functionName: 'transfer',
+          functionName: "transfer",
           args: [data.recipient, data.amount],
         });
-      }, 'Payment transaction');
-
+      }, "Payment transaction");
     } catch (err) {
       const parsedError = parseWeb3Error(err);
-      handleError(err, 'Payment processing');
+      handleError(err, "Payment processing");
 
-      if (parsedError.type === 'insufficient_funds') {
-        notifyTransactionFailed('Insufficient funds');
-      } else if (parsedError.type === 'user_rejected') {
-        notifyTransactionFailed('Transaction rejected by user');
+      if (parsedError.type === "insufficient_funds") {
+        notifyTransactionFailed("Insufficient funds");
+      } else if (parsedError.type === "user_rejected") {
+        notifyTransactionFailed("Transaction rejected by user");
       } else {
         notifyTransactionFailed(parsedError.message);
       }
@@ -149,7 +153,7 @@ export function useUserBalance() {
  */
 export function calculatePaymentAmount(
   plan: SubscriptionPlan,
-  duration: 'monthly' | 'yearly'
+  duration: "monthly" | "yearly"
 ): bigint {
   return calculatePriceInAI3(plan, duration);
 }
@@ -181,7 +185,7 @@ export function formatPaymentAmount(amount: bigint): string {
  */
 export function getPaymentRecipient(): Address {
   return (process.env.NEXT_PUBLIC_PAYMENT_RECIPIENT ||
-    '0x0000000000000000000000000000000000000000') as Address;
+    "0x0000000000000000000000000000000000000000") as Address;
 }
 
 /**
@@ -190,15 +194,15 @@ export function getPaymentRecipient(): Address {
  */
 export async function createAI3PaymentSession(
   plan: SubscriptionPlan,
-  duration: 'monthly' | 'yearly',
+  duration: "monthly" | "yearly",
   userAddress: string
 ): Promise<{ sessionId: string; paymentUrl: string } | null> {
   try {
     return await retryNetworkRequest(async () => {
-      const response = await fetch('/api/payment/create-session', {
-        method: 'POST',
+      const response = await fetch("/api/payment/create-session", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           plan,
@@ -208,13 +212,13 @@ export async function createAI3PaymentSession(
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create payment session');
+        throw new Error("Failed to create payment session");
       }
 
       return await response.json();
-    }, 'Create payment session');
+    }, "Create payment session");
   } catch (error) {
-    handleError(error, 'Creating payment session');
+    handleError(error, "Creating payment session");
     return null;
   }
 }
@@ -225,17 +229,19 @@ export async function createAI3PaymentSession(
 export async function verifyAI3Payment(sessionId: string): Promise<boolean> {
   try {
     return await retryNetworkRequest(async () => {
-      const response = await fetch(`/api/payment/verify?sessionId=${sessionId}`);
+      const response = await fetch(
+        `/api/payment/verify?sessionId=${sessionId}`
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to verify payment');
+        throw new Error("Failed to verify payment");
       }
 
       const data = await response.json();
       return data.verified === true;
-    }, 'Verify payment');
+    }, "Verify payment");
   } catch (error) {
-    handleError(error, 'Verifying payment');
+    handleError(error, "Verifying payment");
     return false;
   }
 }
@@ -244,11 +250,11 @@ export async function verifyAI3Payment(sessionId: string): Promise<boolean> {
  * Payment status enum
  */
 export enum PaymentStatus {
-  PENDING = 'pending',
-  PROCESSING = 'processing',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled',
+  PENDING = "pending",
+  PROCESSING = "processing",
+  COMPLETED = "completed",
+  FAILED = "failed",
+  CANCELLED = "cancelled",
 }
 
 /**
@@ -269,12 +275,15 @@ export interface PaymentTracker {
 export function trackPayment(payment: PaymentTracker): void {
   try {
     const key = `payment_${payment.id}`;
-    localStorage.setItem(key, JSON.stringify({
-      ...payment,
-      amount: payment.amount.toString(), // BigInt to string for JSON
-    }));
+    localStorage.setItem(
+      key,
+      JSON.stringify({
+        ...payment,
+        amount: payment.amount.toString(), // BigInt to string for JSON
+      })
+    );
   } catch (error) {
-    console.error('Error tracking payment:', error);
+    console.error("Error tracking payment:", error);
   }
 }
 
@@ -294,7 +303,7 @@ export function getPaymentStatus(paymentId: string): PaymentTracker | null {
       amount: BigInt(parsed.amount), // String back to BigInt
     };
   } catch (error) {
-    console.error('Error getting payment status:', error);
+    console.error("Error getting payment status:", error);
     return null;
   }
 }
@@ -308,7 +317,7 @@ export function getPaymentHistory(): PaymentTracker[] {
 
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key?.startsWith('payment_')) {
+      if (key?.startsWith("payment_")) {
         const data = localStorage.getItem(key);
         if (data) {
           const parsed = JSON.parse(data);
@@ -323,7 +332,7 @@ export function getPaymentHistory(): PaymentTracker[] {
     // Sort by timestamp (newest first)
     return payments.sort((a, b) => b.timestamp - a.timestamp);
   } catch (error) {
-    console.error('Error getting payment history:', error);
+    console.error("Error getting payment history:", error);
     return [];
   }
 }

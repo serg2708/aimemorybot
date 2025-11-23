@@ -3,7 +3,11 @@
  * Provides exponential backoff, custom error types, and retry mechanisms
  */
 
-import { notifyError, notifyLoading, dismissNotification } from './notifications';
+import {
+  dismissNotification,
+  notifyError,
+  notifyLoading,
+} from "./notifications";
 
 /**
  * Custom error types
@@ -11,35 +15,48 @@ import { notifyError, notifyLoading, dismissNotification } from './notifications
 export class NetworkError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'NetworkError';
+    this.name = "NetworkError";
   }
 }
 
 export class TransactionError extends Error {
-  constructor(message: string, public txHash?: string) {
+  constructor(
+    message: string,
+    public txHash?: string
+  ) {
     super(message);
-    this.name = 'TransactionError';
+    this.name = "TransactionError";
   }
 }
 
 export class InsufficientBalanceError extends Error {
-  constructor(message: string, public required?: string, public current?: string) {
+  constructor(
+    message: string,
+    public required?: string,
+    public current?: string
+  ) {
     super(message);
-    this.name = 'InsufficientBalanceError';
+    this.name = "InsufficientBalanceError";
   }
 }
 
 export class DSNError extends Error {
-  constructor(message: string, public cid?: string) {
+  constructor(
+    message: string,
+    public cid?: string
+  ) {
     super(message);
-    this.name = 'DSNError';
+    this.name = "DSNError";
   }
 }
 
 export class WalletError extends Error {
-  constructor(message: string, public code?: string) {
+  constructor(
+    message: string,
+    public code?: string
+  ) {
     super(message);
-    this.name = 'WalletError';
+    this.name = "WalletError";
   }
 }
 
@@ -58,11 +75,11 @@ export interface RetryConfig {
 const DEFAULT_RETRY_CONFIG: Required<RetryConfig> = {
   maxAttempts: 3,
   initialDelay: 1000, // 1 second
-  maxDelay: 10000, // 10 seconds
+  maxDelay: 10_000, // 10 seconds
   backoffMultiplier: 2,
   shouldRetry: (error: Error) => {
     // Retry on network errors, but not on user rejections or insufficient balance
-    if (error instanceof WalletError && error.code === 'ACTION_REJECTED') {
+    if (error instanceof WalletError && error.code === "ACTION_REJECTED") {
       return false;
     }
     if (error instanceof InsufficientBalanceError) {
@@ -76,8 +93,11 @@ const DEFAULT_RETRY_CONFIG: Required<RetryConfig> = {
 /**
  * Calculate delay with exponential backoff
  */
-function calculateDelay(attempt: number, config: Required<RetryConfig>): number {
-  const delay = config.initialDelay * Math.pow(config.backoffMultiplier, attempt - 1);
+function calculateDelay(
+  attempt: number,
+  config: Required<RetryConfig>
+): number {
+  const delay = config.initialDelay * config.backoffMultiplier ** (attempt - 1);
   return Math.min(delay, config.maxDelay);
 }
 
@@ -119,43 +139,46 @@ export async function withRetry<T>(
     }
   }
 
-  throw lastError || new Error('Retry failed with unknown error');
+  throw lastError || new Error("Retry failed with unknown error");
 }
 
 /**
  * Parse error message from various error types
  */
 export function parseErrorMessage(error: unknown): string {
-  if (!error) return 'Unknown error occurred';
+  if (!error) return "Unknown error occurred";
 
-  if (typeof error === 'string') return error;
+  if (typeof error === "string") return error;
 
   if (error instanceof Error) {
     // Handle specific error types
-    if (error.name === 'ACTION_REJECTED' || error.message.includes('User rejected')) {
-      return 'Transaction rejected by user';
+    if (
+      error.name === "ACTION_REJECTED" ||
+      error.message.includes("User rejected")
+    ) {
+      return "Transaction rejected by user";
     }
 
-    if (error.message.includes('insufficient funds')) {
-      return 'Insufficient funds for transaction';
+    if (error.message.includes("insufficient funds")) {
+      return "Insufficient funds for transaction";
     }
 
-    if (error.message.includes('network')) {
-      return 'Network error. Please check your connection';
+    if (error.message.includes("network")) {
+      return "Network error. Please check your connection";
     }
 
     return error.message;
   }
 
   // Handle object with message property
-  if (typeof error === 'object' && error !== null) {
+  if (typeof error === "object" && error !== null) {
     const err = error as any;
-    if ('message' in err) return String(err.message);
-    if ('reason' in err) return String(err.reason);
-    if ('error' in err) return parseErrorMessage(err.error);
+    if ("message" in err) return String(err.message);
+    if ("reason" in err) return String(err.reason);
+    if ("error" in err) return parseErrorMessage(err.error);
   }
 
-  return 'An unexpected error occurred';
+  return "An unexpected error occurred";
 }
 
 /**
@@ -174,7 +197,7 @@ export function handleError(error: unknown, context?: string): void {
  */
 export async function retryTransaction<T>(
   operation: () => Promise<T>,
-  operationName: string = 'Transaction'
+  operationName = "Transaction"
 ): Promise<T> {
   const notificationId = `retry-${Date.now()}`;
 
@@ -184,11 +207,14 @@ export async function retryTransaction<T>(
     maxDelay: 8000,
     onRetry: (error, attempt) => {
       console.warn(`${operationName} failed (attempt ${attempt}):`, error);
-      notifyLoading(`${operationName} failed. Retrying... (${attempt}/3)`, notificationId);
+      notifyLoading(
+        `${operationName} failed. Retrying... (${attempt}/3)`,
+        notificationId
+      );
     },
     shouldRetry: (error) => {
       // Don't retry on user rejection
-      if (parseErrorMessage(error).includes('rejected')) {
+      if (parseErrorMessage(error).includes("rejected")) {
         dismissNotification(notificationId);
         return false;
       }
@@ -204,12 +230,12 @@ export async function retryTransaction<T>(
  */
 export async function retryDSNOperation<T>(
   operation: () => Promise<T>,
-  operationName: string = 'DSN operation'
+  operationName = "DSN operation"
 ): Promise<T> {
   return withRetry(operation, {
     maxAttempts: 4,
     initialDelay: 1000,
-    maxDelay: 16000,
+    maxDelay: 16_000,
     onRetry: (error, attempt) => {
       console.warn(`${operationName} failed (attempt ${attempt}):`, error);
     },
@@ -221,7 +247,7 @@ export async function retryDSNOperation<T>(
  */
 export async function retryNetworkRequest<T>(
   request: () => Promise<T>,
-  requestName: string = 'Network request'
+  requestName = "Network request"
 ): Promise<T> {
   return withRetry(request, {
     maxAttempts: 3,
@@ -230,11 +256,13 @@ export async function retryNetworkRequest<T>(
     shouldRetry: (error) => {
       // Retry on network errors and 5xx status codes
       const message = parseErrorMessage(error);
-      return message.includes('network') ||
-             message.includes('timeout') ||
-             message.includes('502') ||
-             message.includes('503') ||
-             message.includes('504');
+      return (
+        message.includes("network") ||
+        message.includes("timeout") ||
+        message.includes("502") ||
+        message.includes("503") ||
+        message.includes("504")
+      );
     },
     onRetry: (error, attempt) => {
       console.warn(`${requestName} failed (attempt ${attempt}):`, error);
@@ -262,47 +290,61 @@ export async function safeAsync<T>(
  * Validate and parse Web3 error
  */
 export function parseWeb3Error(error: unknown): {
-  type: 'user_rejected' | 'insufficient_funds' | 'network' | 'contract' | 'unknown';
+  type:
+    | "user_rejected"
+    | "insufficient_funds"
+    | "network"
+    | "contract"
+    | "unknown";
   message: string;
   shouldRetry: boolean;
 } {
   const message = parseErrorMessage(error);
   const lowerMessage = message.toLowerCase();
 
-  if (lowerMessage.includes('user rejected') || lowerMessage.includes('user denied')) {
+  if (
+    lowerMessage.includes("user rejected") ||
+    lowerMessage.includes("user denied")
+  ) {
     return {
-      type: 'user_rejected',
-      message: 'Transaction rejected by user',
+      type: "user_rejected",
+      message: "Transaction rejected by user",
       shouldRetry: false,
     };
   }
 
-  if (lowerMessage.includes('insufficient funds') || lowerMessage.includes('insufficient balance')) {
+  if (
+    lowerMessage.includes("insufficient funds") ||
+    lowerMessage.includes("insufficient balance")
+  ) {
     return {
-      type: 'insufficient_funds',
-      message: 'Insufficient funds for transaction',
+      type: "insufficient_funds",
+      message: "Insufficient funds for transaction",
       shouldRetry: false,
     };
   }
 
-  if (lowerMessage.includes('network') || lowerMessage.includes('timeout')) {
+  if (lowerMessage.includes("network") || lowerMessage.includes("timeout")) {
     return {
-      type: 'network',
-      message: 'Network error. Please check your connection',
+      type: "network",
+      message: "Network error. Please check your connection",
       shouldRetry: true,
     };
   }
 
-  if (lowerMessage.includes('execution reverted') || lowerMessage.includes('revert')) {
+  if (
+    lowerMessage.includes("execution reverted") ||
+    lowerMessage.includes("revert")
+  ) {
     return {
-      type: 'contract',
-      message: 'Smart contract execution failed',
+      type: "contract",
+      message: "Smart contract execution failed",
       shouldRetry: false,
     };
   }
 
   return {
-    type: 'unknown',
+    type: "unknown",
     message,
     shouldRetry: true,
   };
@@ -318,7 +360,7 @@ export class ErrorBoundaryError extends Error {
     public originalError?: Error
   ) {
     super(message);
-    this.name = 'ErrorBoundaryError';
+    this.name = "ErrorBoundaryError";
   }
 }
 
@@ -329,12 +371,12 @@ export function logError(error: unknown, context?: string): void {
   const timestamp = new Date().toISOString();
   const message = parseErrorMessage(error);
 
-  console.group(`🔴 Error ${context ? `(${context})` : ''} - ${timestamp}`);
-  console.error('Message:', message);
+  console.group(`🔴 Error ${context ? `(${context})` : ""} - ${timestamp}`);
+  console.error("Message:", message);
   if (error instanceof Error) {
-    console.error('Stack:', error.stack);
+    console.error("Stack:", error.stack);
   }
-  console.error('Raw error:', error);
+  console.error("Raw error:", error);
   console.groupEnd();
 }
 

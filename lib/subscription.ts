@@ -4,40 +4,47 @@
  * Falls back to mock mode when contract is not configured
  */
 
-'use client';
+"use client";
 
-import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import {
-  SUBSCRIPTION_ABI,
-  SubscriptionPlan,
-  type SubscriptionData,
-  parseSubscription,
-  isSubscriptionActive,
+  useAccount,
+  useReadContract,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
+import {
   getDaysUntilExpiration,
-} from './contract';
-import { CONTRACT_ADDRESSES } from './web3';
+  isSubscriptionActive,
+  parseSubscription,
+  SUBSCRIPTION_ABI,
+  type SubscriptionData,
+  SubscriptionPlan,
+} from "./contract";
 import {
-  useMockSubscription,
-  useMockSubscribe,
-  useMockExtendSubscription,
   useMockCancelSubscription,
-} from './subscription-mock';
+  useMockExtendSubscription,
+  useMockSubscribe,
+  useMockSubscription,
+} from "./subscription-mock";
+import { CONTRACT_ADDRESSES } from "./web3";
 
 // Check if we should use mock mode
 const useMockMode = () => {
   const { chainId } = useAccount();
   const contractAddress = chainId
-    ? CONTRACT_ADDRESSES.subscription[chainId as keyof typeof CONTRACT_ADDRESSES.subscription]
+    ? CONTRACT_ADDRESSES.subscription[
+        chainId as keyof typeof CONTRACT_ADDRESSES.subscription
+      ]
     : undefined;
 
   // Use mock mode if:
   // 1. Explicitly enabled via env var, OR
   // 2. Contract address is not configured
   return (
-    process.env.NEXT_PUBLIC_MOCK_SUBSCRIPTION === 'true' ||
+    process.env.NEXT_PUBLIC_MOCK_SUBSCRIPTION === "true" ||
     !contractAddress ||
-    contractAddress === ''
+    contractAddress === ""
   );
 };
 
@@ -49,18 +56,26 @@ export function useSubscription() {
   const mockMode = useMockMode();
   const mockSubscription = useMockSubscription();
   const { address, chainId } = useAccount();
-  const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
+  const [subscription, setSubscription] = useState<SubscriptionData | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   const contractAddress = chainId
-    ? CONTRACT_ADDRESSES.subscription[chainId as keyof typeof CONTRACT_ADDRESSES.subscription]
+    ? CONTRACT_ADDRESSES.subscription[
+        chainId as keyof typeof CONTRACT_ADDRESSES.subscription
+      ]
     : undefined;
 
-  const { data, isError, isLoading: isReading } = useReadContract({
+  const {
+    data,
+    isError,
+    isLoading: isReading,
+  } = useReadContract({
     address: contractAddress as `0x${string}`,
     abi: SUBSCRIPTION_ABI,
-    functionName: 'getSubscription',
+    functionName: "getSubscription",
     args: address ? [address] : undefined,
     query: {
       enabled: !!address && !!contractAddress && !mockMode,
@@ -76,7 +91,7 @@ export function useSubscription() {
     if (isReading) {
       setIsLoading(true);
     } else if (isError) {
-      setError(new Error('Failed to fetch subscription'));
+      setError(new Error("Failed to fetch subscription"));
       setIsLoading(false);
     } else if (data) {
       setSubscription(parseSubscription(data));
@@ -107,7 +122,12 @@ export function useSubscription() {
 export function useSubscribe() {
   const mockMode = useMockMode();
   const mockSubscribe = useMockSubscribe();
-  const { writeContractAsync, data: hash, isPending, error } = useWriteContract();
+  const {
+    writeContractAsync,
+    data: hash,
+    isPending,
+    error,
+  } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
   });
@@ -115,7 +135,7 @@ export function useSubscribe() {
 
   const subscribe = async (
     plan: SubscriptionPlan,
-    duration: 'monthly' | 'yearly',
+    duration: "monthly" | "yearly",
     value: bigint
   ) => {
     // Use mock mode if enabled
@@ -124,21 +144,24 @@ export function useSubscribe() {
     }
 
     const contractAddress = chainId
-      ? CONTRACT_ADDRESSES.subscription[chainId as keyof typeof CONTRACT_ADDRESSES.subscription]
+      ? CONTRACT_ADDRESSES.subscription[
+          chainId as keyof typeof CONTRACT_ADDRESSES.subscription
+        ]
       : undefined;
 
     if (!contractAddress) {
-      throw new Error('Subscription contract not available on this chain');
+      throw new Error("Subscription contract not available on this chain");
     }
 
-    const durationSeconds = duration === 'monthly'
-      ? BigInt(30 * 24 * 60 * 60)
-      : BigInt(365 * 24 * 60 * 60);
+    const durationSeconds =
+      duration === "monthly"
+        ? BigInt(30 * 24 * 60 * 60)
+        : BigInt(365 * 24 * 60 * 60);
 
     return writeContractAsync({
       address: contractAddress as `0x${string}`,
       abi: SUBSCRIPTION_ABI,
-      functionName: 'subscribe',
+      functionName: "subscribe",
       args: [plan, durationSeconds],
       value,
     });
@@ -173,34 +196,42 @@ export function useSubscribe() {
 export function useExtendSubscription() {
   const mockMode = useMockMode();
   const mockExtend = useMockExtendSubscription();
-  const { writeContractAsync, data: hash, isPending, error } = useWriteContract();
+  const {
+    writeContractAsync,
+    data: hash,
+    isPending,
+    error,
+  } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
   });
   const { chainId } = useAccount();
 
-  const extend = async (duration: 'monthly' | 'yearly', value: bigint) => {
+  const extend = async (duration: "monthly" | "yearly", value: bigint) => {
     // Use mock mode if enabled
     if (mockMode) {
       return mockExtend.extend(duration, value);
     }
 
     const contractAddress = chainId
-      ? CONTRACT_ADDRESSES.subscription[chainId as keyof typeof CONTRACT_ADDRESSES.subscription]
+      ? CONTRACT_ADDRESSES.subscription[
+          chainId as keyof typeof CONTRACT_ADDRESSES.subscription
+        ]
       : undefined;
 
     if (!contractAddress) {
-      throw new Error('Subscription contract not available on this chain');
+      throw new Error("Subscription contract not available on this chain");
     }
 
-    const durationSeconds = duration === 'monthly'
-      ? BigInt(30 * 24 * 60 * 60)
-      : BigInt(365 * 24 * 60 * 60);
+    const durationSeconds =
+      duration === "monthly"
+        ? BigInt(30 * 24 * 60 * 60)
+        : BigInt(365 * 24 * 60 * 60);
 
     return writeContractAsync({
       address: contractAddress as `0x${string}`,
       abi: SUBSCRIPTION_ABI,
-      functionName: 'extendSubscription',
+      functionName: "extendSubscription",
       args: [durationSeconds],
       value,
     });
@@ -235,7 +266,12 @@ export function useExtendSubscription() {
 export function useCancelSubscription() {
   const mockMode = useMockMode();
   const mockCancel = useMockCancelSubscription();
-  const { writeContractAsync, data: hash, isPending, error } = useWriteContract();
+  const {
+    writeContractAsync,
+    data: hash,
+    isPending,
+    error,
+  } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
   });
@@ -248,17 +284,19 @@ export function useCancelSubscription() {
     }
 
     const contractAddress = chainId
-      ? CONTRACT_ADDRESSES.subscription[chainId as keyof typeof CONTRACT_ADDRESSES.subscription]
+      ? CONTRACT_ADDRESSES.subscription[
+          chainId as keyof typeof CONTRACT_ADDRESSES.subscription
+        ]
       : undefined;
 
     if (!contractAddress) {
-      throw new Error('Subscription contract not available on this chain');
+      throw new Error("Subscription contract not available on this chain");
     }
 
     return writeContractAsync({
       address: contractAddress as `0x${string}`,
       abi: SUBSCRIPTION_ABI,
-      functionName: 'cancelSubscription',
+      functionName: "cancelSubscription",
     });
   };
 
@@ -287,12 +325,15 @@ export function useCancelSubscription() {
 /**
  * Local storage keys for subscription cache
  */
-const SUBSCRIPTION_CACHE_KEY = 'aimemorybox_subscription_cache';
+const SUBSCRIPTION_CACHE_KEY = "aimemorybox_subscription_cache";
 
 /**
  * Cache subscription data locally
  */
-export function cacheSubscription(address: string, subscription: SubscriptionData): void {
+export function cacheSubscription(
+  address: string,
+  subscription: SubscriptionData
+): void {
   try {
     const cache = {
       [address.toLowerCase()]: {
@@ -302,14 +343,16 @@ export function cacheSubscription(address: string, subscription: SubscriptionDat
     };
     localStorage.setItem(SUBSCRIPTION_CACHE_KEY, JSON.stringify(cache));
   } catch (error) {
-    console.error('Failed to cache subscription:', error);
+    console.error("Failed to cache subscription:", error);
   }
 }
 
 /**
  * Get cached subscription data
  */
-export function getCachedSubscription(address: string): SubscriptionData | null {
+export function getCachedSubscription(
+  address: string
+): SubscriptionData | null {
   try {
     const cacheStr = localStorage.getItem(SUBSCRIPTION_CACHE_KEY);
     if (!cacheStr) return null;
@@ -329,7 +372,7 @@ export function getCachedSubscription(address: string): SubscriptionData | null 
       isActive: cached.isActive,
     };
   } catch (error) {
-    console.error('Failed to get cached subscription:', error);
+    console.error("Failed to get cached subscription:", error);
     return null;
   }
 }
@@ -341,7 +384,7 @@ export function clearSubscriptionCache(): void {
   try {
     localStorage.removeItem(SUBSCRIPTION_CACHE_KEY);
   } catch (error) {
-    console.error('Failed to clear subscription cache:', error);
+    console.error("Failed to clear subscription cache:", error);
   }
 }
 
@@ -350,18 +393,18 @@ export function clearSubscriptionCache(): void {
  */
 export function hasFeatureAccess(
   subscription: SubscriptionData | null,
-  feature: 'advanced_models' | 'unlimited_history' | 'priority_support'
+  feature: "advanced_models" | "unlimited_history" | "priority_support"
 ): boolean {
   if (!subscription || !isSubscriptionActive(subscription)) {
     return false;
   }
 
   switch (feature) {
-    case 'advanced_models':
+    case "advanced_models":
       return subscription.plan >= SubscriptionPlan.BASIC;
-    case 'unlimited_history':
+    case "unlimited_history":
       return subscription.plan >= SubscriptionPlan.PRO;
-    case 'priority_support':
+    case "priority_support":
       return subscription.plan >= SubscriptionPlan.UNLIMITED;
     default:
       return false;
@@ -384,7 +427,7 @@ export function getMessageLimit(subscription: SubscriptionData | null): number {
     case SubscriptionPlan.PRO:
       return 1000;
     case SubscriptionPlan.UNLIMITED:
-      return Infinity;
+      return Number.POSITIVE_INFINITY;
     default:
       return 10;
   }

@@ -6,12 +6,12 @@ import { memo } from "react";
 import { useWindowSize } from "usehooks-ts";
 import { SidebarToggle } from "@/components/sidebar-toggle";
 import { Button } from "@/components/ui/button";
+import { DSNStatus } from "./dsn-status";
 import { PlusIcon, VercelIcon } from "./icons";
+import { NetworkStatus } from "./network-status";
 import { useSidebar } from "./ui/sidebar";
 import { VisibilitySelector, type VisibilityType } from "./visibility-selector";
 import { HeaderWalletConnect } from "./wallet-connect";
-import { NetworkStatus } from "./network-status";
-import { DSNStatus } from "./dsn-status";
 
 function PureChatHeader({
   chatId,

@@ -3,19 +3,17 @@
  * Simplified structure based on working home page
  */
 
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useAccount } from '@/hooks/use-web3-safe';
-import { Chat } from '@/components/chat';
-import { DataStreamHandler } from '@/components/data-stream-handler';
-import { DEFAULT_CHAT_MODEL } from '@/lib/ai/models';
-import { generateUUID } from '@/lib/utils';
-import Link from 'next/link';
-import { WalletConnect } from '@/components/wallet-connect';
+import Link from "next/link";
+import { useState } from "react";
+import { Chat } from "@/components/chat";
+import { DataStreamHandler } from "@/components/data-stream-handler";
+import { WalletConnect } from "@/components/wallet-connect";
+import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
+import { generateUUID } from "@/lib/utils";
 
 export default function ChatClient() {
-  const { isConnected } = useAccount();
   const [chatModel] = useState(DEFAULT_CHAT_MODEL);
   const [chatId] = useState(() => generateUUID());
 
@@ -23,15 +21,24 @@ export default function ChatClient() {
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
       <div className="container mx-auto px-4 py-4">
-        <div className="flex justify-between items-center">
-          <Link href="/" className="text-2xl font-bold hover:opacity-80 transition-opacity">
+        <div className="flex items-center justify-between">
+          <Link
+            className="font-bold text-2xl transition-opacity hover:opacity-80"
+            href="/"
+          >
             AI Memory Box
           </Link>
-          <div className="flex gap-4 items-center">
-            <Link href="/pricing" className="text-sm font-medium hover:underline">
+          <div className="flex items-center gap-4">
+            <Link
+              className="font-medium text-sm hover:underline"
+              href="/pricing"
+            >
               Pricing
             </Link>
-            <Link href="/dashboard" className="text-sm font-medium hover:underline">
+            <Link
+              className="font-medium text-sm hover:underline"
+              href="/dashboard"
+            >
               Dashboard
             </Link>
             <WalletConnect />

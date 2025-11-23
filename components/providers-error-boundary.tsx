@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import type { ReactNode } from 'react';
-import { Component } from 'react';
+import type { ReactNode } from "react";
+import { Component } from "react";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -13,7 +13,10 @@ interface ErrorBoundaryState {
   error?: Error;
 }
 
-export class ProvidersErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ProvidersErrorBoundary extends Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
@@ -24,7 +27,7 @@ export class ProvidersErrorBoundary extends Component<ErrorBoundaryProps, ErrorB
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Provider Error:', error, errorInfo);
+    console.error("Provider Error:", error, errorInfo);
   }
 
   render() {
@@ -34,7 +37,7 @@ export class ProvidersErrorBoundary extends Component<ErrorBoundaryProps, ErrorB
       }
 
       return (
-        <div style={{ padding: '20px', textAlign: 'center' }}>
+        <div style={{ padding: "20px", textAlign: "center" }}>
           <h2>Failed to initialize providers</h2>
           <p>Error: {this.state.error?.message}</p>
           <button onClick={() => window.location.reload()}>Reload Page</button>

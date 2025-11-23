@@ -3,15 +3,15 @@
  * Provides convenient methods for showing toasts for common scenarios
  */
 
-import { toast } from '@/components/toast';
-import { toast as sonnerToast } from 'sonner';
+import { toast as sonnerToast } from "sonner";
+import { toast } from "@/components/toast";
 
 /**
  * Show success notification
  */
 export function notifySuccess(message: string) {
   return toast({
-    type: 'success',
+    type: "success",
     description: message,
   });
 }
@@ -21,7 +21,7 @@ export function notifySuccess(message: string) {
  */
 export function notifyError(message: string) {
   return toast({
-    type: 'error',
+    type: "error",
     description: message,
   });
 }
@@ -38,7 +38,7 @@ export function notifyWalletConnected(address: string) {
  * Show wallet disconnection
  */
 export function notifyWalletDisconnected() {
-  return sonnerToast.info('Wallet disconnected');
+  return sonnerToast.info("Wallet disconnected");
 }
 
 /**
@@ -54,7 +54,7 @@ export function notifyNetworkSwitched(networkName: string) {
 export function notifyTransactionSubmitted(txHash: string) {
   const shortHash = `${txHash.slice(0, 10)}...${txHash.slice(-8)}`;
   return sonnerToast.loading(`Transaction submitted: ${shortHash}`, {
-    duration: Infinity,
+    duration: Number.POSITIVE_INFINITY,
     id: txHash,
   });
 }
@@ -79,7 +79,9 @@ export function notifyTransactionFailed(error: string) {
  * Show payment successful notification
  */
 export function notifyPaymentSuccess(amount: string, plan: string) {
-  return notifySuccess(`Payment of ${amount} successful! Subscribed to ${plan} plan.`);
+  return notifySuccess(
+    `Payment of ${amount} successful! Subscribed to ${plan} plan.`
+  );
 }
 
 /**
@@ -112,13 +114,13 @@ export function notifyFileDownloading(cid: string) {
  */
 export function notifyFileDownloaded(cid: string) {
   sonnerToast.dismiss(`download-${cid}`);
-  return notifySuccess('File downloaded successfully');
+  return notifySuccess("File downloaded successfully");
 }
 
 /**
  * Show copy to clipboard notification
  */
-export function notifyCopied(label: string = 'Text') {
+export function notifyCopied(label = "Text") {
   return notifySuccess(`${label} copied to clipboard`);
 }
 
@@ -126,45 +128,49 @@ export function notifyCopied(label: string = 'Text') {
  * Show insufficient balance notification
  */
 export function notifyInsufficientBalance(required: string, current: string) {
-  return notifyError(`Insufficient balance. Required: ${required}, Current: ${current}`);
+  return notifyError(
+    `Insufficient balance. Required: ${required}, Current: ${current}`
+  );
 }
 
 /**
  * Show DSN connection status
  */
 export function notifyDSNConnected() {
-  return notifySuccess('Connected to Autonomys DSN');
+  return notifySuccess("Connected to Autonomys DSN");
 }
 
 export function notifyDSNDisconnected() {
-  return sonnerToast.warning('Disconnected from Autonomys DSN');
+  return sonnerToast.warning("Disconnected from Autonomys DSN");
 }
 
 /**
  * Show API key missing notification
  */
 export function notifyAPIKeyMissing() {
-  return sonnerToast.warning('AutoDrive API key not configured. Add NEXT_PUBLIC_AUTONOMYS_API_KEY to enable DSN storage.');
+  return sonnerToast.warning(
+    "AutoDrive API key not configured. Add NEXT_PUBLIC_AUTONOMYS_API_KEY to enable DSN storage."
+  );
 }
 
 /**
  * Show chat saved notification
  */
-export function notifyChatSaved(location: 'local' | 'dsn') {
-  if (location === 'dsn') {
-    return notifySuccess('Chat saved to Autonomys DSN');
+export function notifyChatSaved(location: "local" | "dsn") {
+  if (location === "dsn") {
+    return notifySuccess("Chat saved to Autonomys DSN");
   }
-  return sonnerToast.info('Chat saved locally');
+  return sonnerToast.info("Chat saved locally");
 }
 
 /**
  * Show chat loaded notification
  */
-export function notifyChatLoaded(source: 'local' | 'dsn') {
-  if (source === 'dsn') {
-    return sonnerToast.info('Chat loaded from Autonomys DSN');
+export function notifyChatLoaded(source: "local" | "dsn") {
+  if (source === "dsn") {
+    return sonnerToast.info("Chat loaded from Autonomys DSN");
   }
-  return sonnerToast.info('Chat loaded from local storage');
+  return sonnerToast.info("Chat loaded from local storage");
 }
 
 /**
@@ -172,7 +178,7 @@ export function notifyChatLoaded(source: 'local' | 'dsn') {
  */
 export function notifyExportStarted(format: string) {
   return sonnerToast.loading(`Exporting chat to ${format.toUpperCase()}...`, {
-    id: 'export',
+    id: "export",
   });
 }
 
@@ -180,15 +186,15 @@ export function notifyExportStarted(format: string) {
  * Show export completed
  */
 export function notifyExportCompleted() {
-  sonnerToast.dismiss('export');
-  return notifySuccess('Export completed successfully');
+  sonnerToast.dismiss("export");
+  return notifySuccess("Export completed successfully");
 }
 
 /**
  * Show export failed
  */
 export function notifyExportFailed(error: string) {
-  sonnerToast.dismiss('export');
+  sonnerToast.dismiss("export");
   return notifyError(`Export failed: ${error}`);
 }
 
@@ -203,14 +209,18 @@ export function notifySubscriptionUpdated(plan: string) {
  * Show subscription expired
  */
 export function notifySubscriptionExpired() {
-  return sonnerToast.warning('Your subscription has expired. Please renew to continue using premium features.');
+  return sonnerToast.warning(
+    "Your subscription has expired. Please renew to continue using premium features."
+  );
 }
 
 /**
  * Show subscription expiring soon
  */
 export function notifySubscriptionExpiringSoon(daysLeft: number) {
-  return sonnerToast.warning(`Your subscription expires in ${daysLeft} days. Renew now to avoid interruption.`);
+  return sonnerToast.warning(
+    `Your subscription expires in ${daysLeft} days. Renew now to avoid interruption.`
+  );
 }
 
 /**
@@ -230,15 +240,18 @@ export function dismissNotification(id?: string | number) {
 /**
  * Show custom notification
  */
-export function notify(message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') {
+export function notify(
+  message: string,
+  type: "success" | "error" | "info" | "warning" = "info"
+) {
   switch (type) {
-    case 'success':
+    case "success":
       return notifySuccess(message);
-    case 'error':
+    case "error":
       return notifyError(message);
-    case 'info':
+    case "info":
       return sonnerToast.info(message);
-    case 'warning':
+    case "warning":
       return sonnerToast.warning(message);
   }
 }

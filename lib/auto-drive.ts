@@ -3,17 +3,17 @@
  * Provides persistent, blockchain-backed storage for chat history
  */
 
-import { createAutoDriveApi } from '@autonomys/auto-drive';
-import { NetworkId } from '@autonomys/auto-utils';
-import type { AutoDriveApi } from '@autonomys/auto-drive';
-import { retryDSNOperation, handleError, DSNError } from './error-handling';
+import type { AutoDriveApi } from "@autonomys/auto-drive";
+import { createAutoDriveApi } from "@autonomys/auto-drive";
+import { NetworkId } from "@autonomys/auto-utils";
+import { DSNError, handleError, retryDSNOperation } from "./error-handling";
 import {
-  notifyFileUploaded,
-  notifyFileDownloading,
-  notifyFileDownloaded,
-  notifyDSNConnected,
   notifyAPIKeyMissing,
-} from './notifications';
+  notifyDSNConnected,
+  notifyFileDownloaded,
+  notifyFileDownloading,
+  notifyFileUploaded,
+} from "./notifications";
 
 // Cache the AutoDrive instance
 let autoDriveInstance: AutoDriveApi | null = null;
@@ -34,7 +34,7 @@ let autoDriveInstance: AutoDriveApi | null = null;
 export const AUTONOMYS_CONFIG = {
   apiKey: process.env.NEXT_PUBLIC_AUTONOMYS_API_KEY,
   network: NetworkId.MAINNET,
-  networkName: 'mainnet' as const,
+  networkName: "mainnet" as const,
 };
 
 /**
@@ -48,27 +48,27 @@ export async function getAutoDrive(): Promise<AutoDriveApi | null> {
 
   try {
     // Check if we're in the browser
-    if (typeof window === 'undefined') {
-      console.warn('AutoDrive is only available in browser environment');
+    if (typeof window === "undefined") {
+      console.warn("AutoDrive is only available in browser environment");
       return null;
     }
 
     // Check if API key is available
     if (!AUTONOMYS_CONFIG.apiKey) {
-      console.warn('NEXT_PUBLIC_AUTONOMYS_API_KEY is not configured');
+      console.warn("NEXT_PUBLIC_AUTONOMYS_API_KEY is not configured");
       return null;
     }
 
     // Initialize AutoDrive
     autoDriveInstance = createAutoDriveApi({
       apiKey: AUTONOMYS_CONFIG.apiKey,
-      network: AUTONOMYS_CONFIG.networkName as 'mainnet' | 'taurus',
+      network: AUTONOMYS_CONFIG.networkName as "mainnet" | "taurus",
     });
 
-    console.log('AutoDrive initialized successfully');
+    console.log("AutoDrive initialized successfully");
     return autoDriveInstance;
   } catch (error) {
-    console.error('Failed to initialize AutoDrive:', error);
+    console.error("Failed to initialize AutoDrive:", error);
     return null;
   }
 }
@@ -91,7 +91,7 @@ export async function uploadToAutoDrive(
       if (!AUTONOMYS_CONFIG.apiKey) {
         notifyAPIKeyMissing();
       }
-      throw new DSNError('AutoDrive not initialized');
+      throw new DSNError("AutoDrive not initialized");
     }
 
     // Upload with retry logic
@@ -106,20 +106,16 @@ export async function uploadToAutoDrive(
       const buffer = Buffer.from(JSON.stringify(dataWithMetadata));
 
       // Upload to AutoDrive
-      return await autoDrive.uploadFileFromBuffer(
-        buffer,
-        'messages.json',
-        {
-          compression: true,
-        }
-      );
-    }, 'Upload to AutoDrive');
+      return await autoDrive.uploadFileFromBuffer(buffer, "messages.json", {
+        compression: true,
+      });
+    }, "Upload to AutoDrive");
 
-    console.log('Uploaded to AutoDrive:', cid);
+    console.log("Uploaded to AutoDrive:", cid);
     notifyFileUploaded(cid);
     return cid;
   } catch (error) {
-    handleError(error, 'Uploading to AutoDrive');
+    handleError(error, "Uploading to AutoDrive");
     return null;
   }
 }
@@ -127,14 +123,16 @@ export async function uploadToAutoDrive(
 /**
  * Download data from Autonomys DSN using CID
  */
-export async function downloadFromAutoDrive(cid: string): Promise<string | null> {
+export async function downloadFromAutoDrive(
+  cid: string
+): Promise<string | null> {
   try {
     const autoDrive = await getAutoDrive();
     if (!autoDrive) {
       if (!AUTONOMYS_CONFIG.apiKey) {
         notifyAPIKeyMissing();
       }
-      throw new DSNError('AutoDrive not initialized', cid);
+      throw new DSNError("AutoDrive not initialized", cid);
     }
 
     notifyFileDownloading(cid);
@@ -151,17 +149,17 @@ export async function downloadFromAutoDrive(cid: string): Promise<string | null>
       }
 
       // Convert buffer to string and parse JSON
-      const text = file.toString('utf-8');
+      const text = file.toString("utf-8");
       const parsedData = JSON.parse(text);
 
       return parsedData.data || text;
-    }, 'Download from AutoDrive');
+    }, "Download from AutoDrive");
 
-    console.log('Downloaded from AutoDrive:', cid);
+    console.log("Downloaded from AutoDrive:", cid);
     notifyFileDownloaded(cid);
     return data;
   } catch (error) {
-    handleError(error, 'Downloading from AutoDrive');
+    handleError(error, "Downloading from AutoDrive");
     return null;
   }
 }
@@ -173,7 +171,7 @@ export async function listUserFiles(address: string): Promise<any[]> {
   try {
     const autoDrive = await getAutoDrive();
     if (!autoDrive) {
-      throw new Error('AutoDrive not initialized');
+      throw new Error("AutoDrive not initialized");
     }
 
     // Get files from AutoDrive (page 0, limit 100)
@@ -186,7 +184,7 @@ export async function listUserFiles(address: string): Promise<any[]> {
     // Note: Filtering may need to be done client-side or via metadata stored with file
     return files;
   } catch (error) {
-    console.error('Failed to list user files:', error);
+    console.error("Failed to list user files:", error);
     return [];
   }
 }
@@ -199,15 +197,15 @@ export async function deleteFromAutoDrive(cid: string): Promise<boolean> {
   try {
     const autoDrive = await getAutoDrive();
     if (!autoDrive) {
-      throw new Error('AutoDrive not initialized');
+      throw new Error("AutoDrive not initialized");
     }
 
     // Note: Delete functionality may not be available in current AutoDrive API
     // Files on blockchain are typically immutable
-    console.warn('Delete operation not supported by AutoDrive API');
+    console.warn("Delete operation not supported by AutoDrive API");
     return false;
   } catch (error) {
-    console.error('Failed to delete from AutoDrive:', error);
+    console.error("Failed to delete from AutoDrive:", error);
     return false;
   }
 }
@@ -235,7 +233,7 @@ export async function getStorageStats(address: string): Promise<{
       lastUpdated: lastUpdated || undefined,
     };
   } catch (error) {
-    console.error('Failed to get storage stats:', error);
+    console.error("Failed to get storage stats:", error);
     return {
       fileCount: 0,
       totalSize: 0,
@@ -266,7 +264,7 @@ export async function getAutoDriveStatus(): Promise<{
   const connected = await isAutoDriveAvailable();
   return {
     connected,
-    network: 'mainnet',
+    network: "mainnet",
     apiKeyConfigured: !!AUTONOMYS_CONFIG.apiKey,
   };
 }

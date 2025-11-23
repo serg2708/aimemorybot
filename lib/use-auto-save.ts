@@ -3,21 +3,21 @@
  * Provides automatic sync to AutoDrive DSN
  */
 
-'use client';
+"use client";
 
-import { useEffect, useCallback, useState } from 'react';
-import { useAccount } from 'wagmi';
+import { useCallback, useEffect, useState } from "react";
+import { useAccount } from "wagmi";
+import { getAutoDriveStatus } from "./auto-drive";
 import {
-  ChatSession,
+  type ChatSession,
+  getChatById,
+  getStorageStats,
   saveChat,
   saveChatToDSN,
-  getChatById,
   startAutoSync,
   stopAutoSync,
-  getStorageStats,
   syncAllChatsToDSN,
-} from './chat-persistence';
-import { getAutoDriveStatus } from './auto-drive';
+} from "./chat-persistence";
 
 export function useAutoSave(chatId?: string) {
   const { address, isConnected } = useAccount();
@@ -141,7 +141,7 @@ export function useDSNSyncStatus() {
     updateStatus();
 
     // Update every 10 seconds
-    const interval = setInterval(updateStatus, 10000);
+    const interval = setInterval(updateStatus, 10_000);
 
     return () => clearInterval(interval);
   }, [address, isConnected]);

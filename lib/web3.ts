@@ -3,13 +3,13 @@
  * Autonomys Network only - for AI3 token payments and DSN storage
  */
 
-import { getDefaultConfig } from '@rainbow-me/rainbowkit';
-import { defineChain } from 'viem';
+import { getDefaultConfig } from "@rainbow-me/rainbowkit";
+import { defineChain } from "viem";
 
 // Helper function to determine network (safe to call on both client and server)
 const getIsTestnet = () => {
   // Always use env variable directly - works on both server and client
-  return process.env.NEXT_PUBLIC_AUTONOMYS_NETWORK === 'testnet';
+  return process.env.NEXT_PUBLIC_AUTONOMYS_NETWORK === "testnet";
 };
 
 // Autonomys Auto EVM (EVM-compatible, for AI3 token payments)
@@ -19,28 +19,34 @@ const isTestnet = getIsTestnet();
 
 export const autonomysAutoEVM = defineChain({
   id: isTestnet ? 8700 : 870, // Testnet (Chronos): 8700, Mainnet: 870
-  name: isTestnet ? 'AutoEVM Testnet (Chronos)' : 'AutoEVM Mainnet',
+  name: isTestnet ? "AutoEVM Testnet (Chronos)" : "AutoEVM Mainnet",
   nativeCurrency: {
     decimals: 18,
-    name: isTestnet ? 'tAI3' : 'AI3',
-    symbol: isTestnet ? 'tAI3' : 'AI3',
+    name: isTestnet ? "tAI3" : "AI3",
+    symbol: isTestnet ? "tAI3" : "AI3",
   },
   rpcUrls: {
     default: {
-      http: [isTestnet
-        ? 'https://rpc-0.chronos.autonomys.xyz'
-        : 'https://auto-evm.mainnet.autonomys.xyz'],
-      webSocket: [isTestnet
-        ? 'wss://auto-evm.chronos.autonomys.xyz/ws'
-        : 'wss://auto-evm.mainnet.autonomys.xyz/ws'],
+      http: [
+        isTestnet
+          ? "https://rpc-0.chronos.autonomys.xyz"
+          : "https://auto-evm.mainnet.autonomys.xyz",
+      ],
+      webSocket: [
+        isTestnet
+          ? "wss://auto-evm.chronos.autonomys.xyz/ws"
+          : "wss://auto-evm.mainnet.autonomys.xyz/ws",
+      ],
     },
   },
   blockExplorers: {
     default: {
-      name: isTestnet ? 'AutoEVM Explorer (Chronos)' : 'AutoEVM Explorer (Mainnet)',
+      name: isTestnet
+        ? "AutoEVM Explorer (Chronos)"
+        : "AutoEVM Explorer (Mainnet)",
       url: isTestnet
-        ? 'https://explorer.auto-evm.chronos.autonomys.xyz'
-        : 'https://explorer.mainnet.autonomys.xyz',
+        ? "https://explorer.auto-evm.chronos.autonomys.xyz"
+        : "https://explorer.mainnet.autonomys.xyz",
     },
   },
   testnet: isTestnet,
@@ -49,23 +55,23 @@ export const autonomysAutoEVM = defineChain({
 // Autonomys Network (Substrate-based, for DSN storage)
 // Note: NOT used with wagmi/RainbowKit as it's not EVM-compatible
 export const autonomys = {
-  id: 490000,
-  name: 'Autonomys Network',
+  id: 490_000,
+  name: "Autonomys Network",
   nativeCurrency: {
     decimals: 18,
-    name: 'AUTO',
-    symbol: 'AUTO',
+    name: "AUTO",
+    symbol: "AUTO",
   },
   rpcUrls: {
     default: {
-      http: ['https://rpc-chronos.autonomys.xyz'],
-      webSocket: ['wss://rpc-chronos.autonomys.xyz'],
+      http: ["https://rpc-chronos.autonomys.xyz"],
+      webSocket: ["wss://rpc-chronos.autonomys.xyz"],
     },
   },
   blockExplorers: {
     default: {
-      name: 'Autonomys Explorer',
-      url: 'https://explorer.autonomys.xyz',
+      name: "Autonomys Explorer",
+      url: "https://explorer.autonomys.xyz",
     },
   },
   testnet: false,
@@ -78,12 +84,12 @@ export const getWeb3Config = () => {
   const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
 
   if (!projectId) {
-    console.warn('NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID not set');
+    console.warn("NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID not set");
   }
 
   return getDefaultConfig({
-    appName: 'AI Memory Box',
-    projectId: projectId || 'YOUR_PROJECT_ID', // Fallback for development
+    appName: "AI Memory Box",
+    projectId: projectId || "YOUR_PROJECT_ID", // Fallback for development
     chains: [autonomysAutoEVM], // Autonomys Auto EVM (EVM-compatible only)
     ssr: false, // Disable SSR to avoid indexedDB errors on server
   });
@@ -107,11 +113,12 @@ export const NETWORKS = {
 export const CONTRACT_ADDRESSES = {
   // Subscription contract on Autonomys Auto EVM
   subscription: {
-    [autonomysAutoEVM.id]: process.env.NEXT_PUBLIC_SUBSCRIPTION_CONTRACT_AUTO_EVM || '',
+    [autonomysAutoEVM.id]:
+      process.env.NEXT_PUBLIC_SUBSCRIPTION_CONTRACT_AUTO_EVM || "",
   },
   // Storage contract on Autonomys Network
   storage: {
-    [autonomys.id]: process.env.NEXT_PUBLIC_AUTONOMYS_STORAGE_CONTRACT || '',
+    [autonomys.id]: process.env.NEXT_PUBLIC_AUTONOMYS_STORAGE_CONTRACT || "",
   },
 } as const;
 
@@ -121,9 +128,9 @@ export const CONTRACT_ADDRESSES = {
 export const TOKEN_ADDRESSES = {
   AI3: {
     // AI3 on Autonomys Network (Substrate)
-    [autonomys.id]: process.env.NEXT_PUBLIC_AI3_TOKEN_AUTONOMYS || '',
+    [autonomys.id]: process.env.NEXT_PUBLIC_AI3_TOKEN_AUTONOMYS || "",
     // AI3 on Autonomys Auto EVM
-    [autonomysAutoEVM.id]: process.env.NEXT_PUBLIC_AI3_TOKEN_AUTO_EVM || '',
+    [autonomysAutoEVM.id]: process.env.NEXT_PUBLIC_AI3_TOKEN_AUTO_EVM || "",
   },
 } as const;
 
@@ -131,10 +138,11 @@ export const TOKEN_ADDRESSES = {
  * Get supported tokens for a chain - AI3 only
  */
 export function getSupportedTokens(chainId: number): string[] {
-  const tokenAddress = TOKEN_ADDRESSES.AI3[chainId as keyof typeof TOKEN_ADDRESSES.AI3];
+  const tokenAddress =
+    TOKEN_ADDRESSES.AI3[chainId as keyof typeof TOKEN_ADDRESSES.AI3];
 
   if (tokenAddress) {
-    return ['AI3'];
+    return ["AI3"];
   }
 
   return [];
@@ -152,7 +160,7 @@ export function getAI3TokenAddress(chainId: number): string | undefined {
  * Get token name based on network (tAI3 for testnet, AI3 for mainnet)
  */
 export function getAI3TokenName(): string {
-  return isTestnet ? 'tAI3' : 'AI3';
+  return isTestnet ? "tAI3" : "AI3";
 }
 
 /**
@@ -166,7 +174,7 @@ export function getAI3Decimals(): number {
  * Format address for display (0x1234...5678)
  */
 export function formatAddress(address: string, length = 4): string {
-  if (!address) return '';
+  if (!address) return "";
   if (address.length < length * 2 + 2) return address;
   return `${address.slice(0, length + 2)}...${address.slice(-length)}`;
 }
@@ -186,7 +194,7 @@ export function isSubscriptionSupported(chainId: number): boolean {
 export function getChainName(chainId: number): string {
   const chains = [autonomys, autonomysAutoEVM];
   const chain = chains.find((c) => c.id === chainId);
-  return chain?.name || 'Unknown';
+  return chain?.name || "Unknown";
 }
 
 /**
@@ -200,7 +208,7 @@ export function isValidAddress(address: string): boolean {
  * Convert wei to ether
  */
 export function weiToEther(wei: bigint | string, decimals = 18): string {
-  const weiValue = typeof wei === 'string' ? BigInt(wei) : wei;
+  const weiValue = typeof wei === "string" ? BigInt(wei) : wei;
   const divisor = BigInt(10 ** decimals);
   const ether = Number(weiValue) / Number(divisor);
   return ether.toFixed(6);
@@ -211,6 +219,6 @@ export function weiToEther(wei: bigint | string, decimals = 18): string {
  */
 export function etherToWei(ether: string, decimals = 18): bigint {
   const multiplier = BigInt(10 ** decimals);
-  const etherValue = parseFloat(ether);
+  const etherValue = Number.parseFloat(ether);
   return BigInt(Math.floor(etherValue * Number(multiplier)));
 }
