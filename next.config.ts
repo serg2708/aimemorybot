@@ -1,9 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    ppr: true,
-  },
+  // experimental: {
+  //   ppr: true,
+  // },
+  // NOTE: PPR temporarily disabled due to CVE-2025-66478 security fix
+  // PPR is only available in canary versions, but we need stable patched version
+  // Re-enable when stable versions support PPR
   images: {
     remotePatterns: [
       {
