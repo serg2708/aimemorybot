@@ -72,6 +72,13 @@ const nextConfig: NextConfig = {
       "react-native-randombytes": false,
     };
 
+    // Suppress wallet extension conflicts warnings
+    config.ignoreWarnings = [
+      ...(config.ignoreWarnings || []),
+      /Failed to parse source map/,
+      /Critical dependency: the request of a dependency is an expression/,
+    ];
+
     return config;
   },
 };

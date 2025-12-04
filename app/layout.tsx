@@ -41,6 +41,37 @@ const THEME_COLOR_SCRIPT = `\
   updateThemeColor();
 })();`;
 
+// Script to suppress known wallet extension conflicts
+const WALLET_ERROR_SUPPRESSION_SCRIPT = `\
+(function() {
+  // Suppress known wallet extension errors
+  var originalError = console.error;
+  console.error = function() {
+    var args = Array.prototype.slice.call(arguments);
+    var message = args.join(' ');
+
+    // List of known wallet extension conflict messages to suppress
+    var suppressPatterns = [
+      'Cannot set property ethereum',
+      'Cannot redefine property: ethereum',
+      'Failed to assign ethereum proxy',
+      'Invalid property descriptor',
+      'Talisman extension has not been configured',
+      'MetaMask encountered an error setting the global Ethereum provider'
+    ];
+
+    // Check if error message matches any suppression pattern
+    var shouldSuppress = suppressPatterns.some(function(pattern) {
+      return message.indexOf(pattern) !== -1;
+    });
+
+    // Only log if not suppressed
+    if (!shouldSuppress) {
+      originalError.apply(console, args);
+    }
+  };
+})();`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -57,6 +88,12 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        <script
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: "Required"
+          dangerouslySetInnerHTML={{
+            __html: WALLET_ERROR_SUPPRESSION_SCRIPT,
+          }}
+        />
         <script
           // biome-ignore lint/security/noDangerouslySetInnerHtml: "Required"
           dangerouslySetInnerHTML={{
