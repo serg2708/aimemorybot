@@ -12,7 +12,7 @@ import { useState, useEffect } from 'react';
 type Wallet = {
   extensionName: string;
   title: string;
-  installed: boolean;
+  installed?: boolean;
   logo?: {
     src: string;
     alt: string;
