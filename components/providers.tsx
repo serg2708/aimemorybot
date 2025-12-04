@@ -51,15 +51,8 @@ function ErrorScreen({ error }: { error: Error }) {
 export function Providers({ children }: ProvidersProps) {
   // Single mount check to ensure we're on the client
   const [mounted, setMounted] = useState(false);
-  const [wagmiConfig] = useState(() => {
-    // Initialize config once during component initialization
-    try {
-      return getWeb3Config();
-    } catch (err) {
-      console.error("[Providers] Failed to initialize Web3:", err);
-      return null;
-    }
-  });
+  const [wagmiConfig, setWagmiConfig] = useState<ReturnType<typeof getWeb3Config> | null>(null);
+  const [initError, setInitError] = useState<Error | null>(null);
 
   // Create QueryClient only once
   const [queryClient] = useState(
@@ -75,6 +68,16 @@ export function Providers({ children }: ProvidersProps) {
   );
 
   useEffect(() => {
+    // Initialize Web3 config only on client side to avoid indexedDB errors
+    if (typeof window !== 'undefined') {
+      try {
+        const config = getWeb3Config();
+        setWagmiConfig(config);
+      } catch (err) {
+        console.error("[Providers] Failed to initialize Web3:", err);
+        setInitError(err as Error);
+      }
+    }
     setMounted(true);
   }, []);
 
@@ -84,8 +87,13 @@ export function Providers({ children }: ProvidersProps) {
   }
 
   // Show error screen if config creation failed
+  if (initError || (!wagmiConfig && mounted)) {
+    return <ErrorScreen error={initError || new Error("Failed to create Web3 config")} />;
+  }
+
+  // Wait for wagmiConfig to be ready
   if (!wagmiConfig) {
-    return <ErrorScreen error={new Error("Failed to create Web3 config")} />;
+    return null;
   }
 
   // Render all providers in a single tree
