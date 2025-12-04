@@ -7,19 +7,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-
-// Type definitions for Talisman wallet
-type Wallet = {
-  extensionName: string;
-  title: string;
-  installed?: boolean;
-  logo?: {
-    src: string;
-    alt: string;
-  };
-  enable: (appName: string) => Promise<void>;
-  subscribeAccounts: (callback: (accounts: any[]) => void) => Promise<void>;
-};
+import type { Wallet } from '@talismn/connect-wallets';
 
 interface PolkadotAccount {
   address: string;
