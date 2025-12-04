@@ -1,3 +1,5 @@
+"use client";
+
 import type { Node } from "prosemirror-model";
 import { Plugin, PluginKey } from "prosemirror-state";
 import {

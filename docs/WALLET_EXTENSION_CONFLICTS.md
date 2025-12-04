@@ -30,9 +30,18 @@ Failed to assign ethereum proxy
 - Static imports caused "Class extends undefined" errors during build
 - **Solution**: Changed to dynamic imports (lazy loading)
 
-### 3. ProseMirror and Other Libraries
-- Some libraries don't work well with SSR in Next.js
-- Need proper `"use client"` directives and dynamic imports
+### 3. ProseMirror Library SSR Issues
+- ProseMirror libraries (`prosemirror-*`) don't work with SSR in Next.js
+- These libraries try to extend browser-specific classes that don't exist on the server
+- Static imports without `"use client"` directive caused "Class extends undefined" errors
+- **Solution**: Added `"use client"` directive to ALL files that import ProseMirror modules:
+  - `lib/editor/config.ts`
+  - `lib/editor/suggestions.tsx`
+  - `lib/editor/functions.tsx` (already had it)
+  - `lib/editor/diff.js`
+  - `components/diffview.tsx`
+  - `components/text-editor.tsx` (already had it)
+- This ensures ProseMirror code only runs on the client-side
 
 ## Solutions Implemented
 
@@ -50,6 +59,19 @@ const { getWallets } = await import('@talismn/connect-wallets');
 ```
 
 This ensures the library only loads on the client-side when needed.
+
+### 1.5. Client-Side Only Directive for ProseMirror
+**Files**: All editor-related files that import ProseMirror
+
+Added `"use client"` directive at the top of all files that import ProseMirror:
+```typescript
+"use client";
+
+import { EditorView } from "prosemirror-view";
+// ... other imports
+```
+
+This ensures ProseMirror code never runs during SSR, preventing "Class extends undefined" errors.
 
 ### 2. Webpack Configuration
 **File**: `next.config.ts`
