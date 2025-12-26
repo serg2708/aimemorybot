@@ -1,7 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
+import type { DefaultChatTransport } from "ai";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
@@ -68,6 +68,31 @@ export function Chat({
     currentModelIdRef.current = currentModelId;
   }, [currentModelId]);
 
+  // Create transport with dynamic import to avoid SSR issues
+  const [transport, setTransport] = useState<DefaultChatTransport<ChatMessage> | null>(null);
+
+  useEffect(() => {
+    // Dynamically import DefaultChatTransport only on client side
+    import("ai").then((module) => {
+      const transportInstance = new module.DefaultChatTransport({
+        api: "/api/chat",
+        fetch: fetchWithErrorHandlers,
+        prepareSendMessagesRequest(request) {
+          return {
+            body: {
+              id: request.id,
+              message: request.messages.at(-1),
+              selectedChatModel: currentModelIdRef.current,
+              selectedVisibilityType: visibilityType,
+              ...request.body,
+            },
+          };
+        },
+      });
+      setTransport(transportInstance);
+    });
+  }, [visibilityType]);
+
   const {
     messages,
     setMessages,
@@ -81,21 +106,7 @@ export function Chat({
     messages: initialMessages,
     experimental_throttle: 100,
     generateId: generateUUID,
-    transport: new DefaultChatTransport({
-      api: "/api/chat",
-      fetch: fetchWithErrorHandlers,
-      prepareSendMessagesRequest(request) {
-        return {
-          body: {
-            id: request.id,
-            message: request.messages.at(-1),
-            selectedChatModel: currentModelIdRef.current,
-            selectedVisibilityType: visibilityType,
-            ...request.body,
-          },
-        };
-      },
-    }),
+    transport: transport || undefined,
     onData: (dataPart) => {
       setDataStream((ds) => (ds ? [...ds, dataPart] : []));
       if (dataPart.type === "data-usage") {
