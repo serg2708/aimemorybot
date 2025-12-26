@@ -1,7 +1,6 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
@@ -68,6 +67,64 @@ export function Chat({
     currentModelIdRef.current = currentModelId;
   }, [currentModelId]);
 
+  // Create transport with dynamic import to avoid SSR issues
+  // Using 'any' type to prevent "extends undefined" error during SSR
+  const [transport, setTransport] = useState<any>(null);
+  const [transportError, setTransportError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    // Dynamically import DefaultChatTransport only on client side
+    import("ai").then((module) => {
+      try {
+        const transportInstance = new module.DefaultChatTransport({
+          api: "/api/chat",
+          fetch: fetchWithErrorHandlers,
+          prepareSendMessagesRequest(request) {
+            return {
+              body: {
+                id: request.id,
+                message: request.messages.at(-1),
+                selectedChatModel: currentModelIdRef.current,
+                selectedVisibilityType: visibilityType,
+                ...request.body,
+              },
+            };
+          },
+        });
+        setTransport(transportInstance);
+        console.log("[Chat] DefaultChatTransport initialized successfully");
+      } catch (error) {
+        const err = error instanceof Error ? error : new Error(String(error));
+        console.error("[Chat] CRITICAL: Failed to initialize DefaultChatTransport");
+        console.error("[Chat] Error details:", {
+          name: err.name,
+          message: err.message,
+          stack: err.stack
+        });
+        setTransportError(err);
+        // Transport will remain null, useChat will use default fetch
+      }
+    }).catch((error) => {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error("[Chat] CRITICAL: Failed to import 'ai' module");
+      console.error("[Chat] Error details:", {
+        name: err.name,
+        message: err.message,
+        stack: err.stack
+      });
+      setTransportError(err);
+      // Transport will remain null, useChat will use default fetch
+    });
+  }, [visibilityType]);
+
+  // Warn if transport is not available
+  useEffect(() => {
+    if (transportError) {
+      console.warn("[Chat] Running in fallback mode without DefaultChatTransport");
+      console.warn("[Chat] This may indicate a build or deployment issue");
+    }
+  }, [transportError]);
+
   const {
     messages,
     setMessages,
@@ -81,21 +138,7 @@ export function Chat({
     messages: initialMessages,
     experimental_throttle: 100,
     generateId: generateUUID,
-    transport: new DefaultChatTransport({
-      api: "/api/chat",
-      fetch: fetchWithErrorHandlers,
-      prepareSendMessagesRequest(request) {
-        return {
-          body: {
-            id: request.id,
-            message: request.messages.at(-1),
-            selectedChatModel: currentModelIdRef.current,
-            selectedVisibilityType: visibilityType,
-            ...request.body,
-          },
-        };
-      },
-    }),
+    transport: transport || undefined,
     onData: (dataPart) => {
       setDataStream((ds) => (ds ? [...ds, dataPart] : []));
       if (dataPart.type === "data-usage") {

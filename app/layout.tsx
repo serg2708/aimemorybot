@@ -1,32 +1,25 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import { Toaster } from "sonner";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ClientProviders } from "@/components/client-providers";
+import { SessionProviderWrapper } from "@/components/session-provider-wrapper";
 
 import "./globals.css";
-import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://chat.vercel.ai"),
-  title: "Next.js Chatbot Template",
-  description: "Next.js chatbot template using the AI SDK.",
+  metadataBase: new URL("https://aimemorybox.com"),
+  title: "AI Memory Box - Chat with Permanent Blockchain Memory",
+  description:
+    "AI-powered chat with permanent memory stored on Autonomys blockchain. Your conversations, encrypted and preserved forever.",
 };
 
 export const viewport = {
   maximumScale: 1, // Disable auto-zoom on mobile Safari
 };
 
-const geist = Geist({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-geist",
-});
-
-const geistMono = Geist_Mono({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-geist-mono",
-});
+const geist = GeistSans;
+const geistMono = GeistMono;
 
 const LIGHT_THEME_COLOR = "hsl(0 0% 100%)";
 const DARK_THEME_COLOR = "hsl(240deg 10% 3.92%)";
@@ -48,6 +41,60 @@ const THEME_COLOR_SCRIPT = `\
   updateThemeColor();
 })();`;
 
+// Script to suppress known wallet extension conflicts ONLY
+const WALLET_ERROR_SUPPRESSION_SCRIPT = `\
+(function() {
+  // Suppress ONLY known wallet extension conflicts that are not critical
+  var originalError = console.error;
+  var originalWarn = console.warn;
+
+  console.error = function() {
+    var args = Array.prototype.slice.call(arguments);
+    var message = args.join(' ');
+
+    // List of ONLY wallet extension conflict messages to suppress
+    // DO NOT suppress critical application errors like "class extends" or "undefined"
+    var suppressPatterns = [
+      'Cannot set property ethereum',
+      'Cannot redefine property: ethereum',
+      'Failed to assign ethereum proxy',
+      'Invalid property descriptor',
+      'Talisman extension has not been configured',
+      'MetaMask encountered an error setting the global Ethereum provider'
+    ];
+
+    // Check if error message matches any suppression pattern
+    var shouldSuppress = suppressPatterns.some(function(pattern) {
+      return message.toLowerCase().indexOf(pattern.toLowerCase()) !== -1;
+    });
+
+    // Only log if not suppressed
+    if (!shouldSuppress) {
+      originalError.apply(console, args);
+    }
+  };
+
+  console.warn = function() {
+    var args = Array.prototype.slice.call(arguments);
+    var message = args.join(' ');
+
+    // List of warnings to suppress (wallet-related only)
+    var suppressWarnings = [
+      'Coinbase Wallet extension',
+      'MetaMask extension',
+      'Talisman extension'
+    ];
+
+    var shouldSuppress = suppressWarnings.some(function(pattern) {
+      return message.toLowerCase().indexOf(pattern.toLowerCase()) !== -1;
+    });
+
+    if (!shouldSuppress) {
+      originalWarn.apply(console, args);
+    }
+  };
+})();`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -67,20 +114,23 @@ export default function RootLayout({
         <script
           // biome-ignore lint/security/noDangerouslySetInnerHtml: "Required"
           dangerouslySetInnerHTML={{
+            __html: WALLET_ERROR_SUPPRESSION_SCRIPT,
+          }}
+        />
+        <script
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: "Required"
+          dangerouslySetInnerHTML={{
             __html: THEME_COLOR_SCRIPT,
           }}
         />
       </head>
       <body className="antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          disableTransitionOnChange
-          enableSystem
-        >
-          <Toaster position="top-center" />
-          <SessionProvider>{children}</SessionProvider>
-        </ThemeProvider>
+        <SessionProviderWrapper>
+          <ClientProviders>
+            <Toaster position="top-center" />
+            {children}
+          </ClientProviders>
+        </SessionProviderWrapper>
       </body>
     </html>
   );

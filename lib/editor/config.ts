@@ -1,3 +1,5 @@
+"use client";
+
 import { textblockTypeInputRule } from "prosemirror-inputrules";
 import { Schema } from "prosemirror-model";
 import { schema } from "prosemirror-schema-basic";

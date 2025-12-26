@@ -311,6 +311,33 @@ export async function POST(request: Request) {
   }
 }
 
+export async function HEAD(request: Request) {
+  try {
+    // Attempt to get session, but don't fail if it errors
+    const session = await auth();
+
+    if (!session?.user) {
+      // Return 200 instead of 401 to avoid blocking UI
+      // The actual POST request will handle auth properly
+      return new Response(null, { status: 200 });
+    }
+
+    // Return 200 to indicate chat API is available
+    return new Response(null, { status: 200 });
+  } catch (error) {
+    // Log error for debugging but always return 200
+    // HEAD requests are used for availability checks, not authentication
+    if (error instanceof Error) {
+      console.warn("[HEAD /chat] Session check failed:", error.message);
+    } else {
+      console.warn("[HEAD /chat] Session check failed:", error);
+    }
+
+    // Always return 200 to avoid blocking UI
+    return new Response(null, { status: 200 });
+  }
+}
+
 export async function DELETE(request: Request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
