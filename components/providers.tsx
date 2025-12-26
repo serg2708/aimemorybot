@@ -72,12 +72,24 @@ export function Providers({ children }: ProvidersProps) {
     // Initialize Web3 config only on client side to avoid indexedDB errors
     if (typeof window !== 'undefined') {
       try {
+        console.log("[Providers] Starting Web3 initialization...");
         const config = getWeb3Config();
         setWagmiConfig(config);
         console.log("[Providers] Web3 initialized successfully");
       } catch (err) {
         console.error("[Providers] Failed to initialize Web3:", err);
+
+        // Enhanced error logging for debugging
+        if (err instanceof Error) {
+          console.error("[Providers] Error details:", {
+            name: err.name,
+            message: err.message,
+            stack: err.stack?.split('\n').slice(0, 3).join('\n')
+          });
+        }
+
         console.warn("[Providers] Continuing in fallback mode without Web3 features");
+        console.warn("[Providers] This is expected if Coinbase Analytics or other external wallet services are unavailable");
         setInitError(err as Error);
         setFallbackMode(true);
       }

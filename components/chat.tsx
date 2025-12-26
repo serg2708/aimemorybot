@@ -1,7 +1,6 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import type { DefaultChatTransport } from "ai";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
@@ -69,27 +68,36 @@ export function Chat({
   }, [currentModelId]);
 
   // Create transport with dynamic import to avoid SSR issues
-  const [transport, setTransport] = useState<DefaultChatTransport<ChatMessage> | null>(null);
+  // Using 'any' type to prevent "extends undefined" error during SSR
+  const [transport, setTransport] = useState<any>(null);
 
   useEffect(() => {
     // Dynamically import DefaultChatTransport only on client side
     import("ai").then((module) => {
-      const transportInstance = new module.DefaultChatTransport({
-        api: "/api/chat",
-        fetch: fetchWithErrorHandlers,
-        prepareSendMessagesRequest(request) {
-          return {
-            body: {
-              id: request.id,
-              message: request.messages.at(-1),
-              selectedChatModel: currentModelIdRef.current,
-              selectedVisibilityType: visibilityType,
-              ...request.body,
-            },
-          };
-        },
-      });
-      setTransport(transportInstance);
+      try {
+        const transportInstance = new module.DefaultChatTransport({
+          api: "/api/chat",
+          fetch: fetchWithErrorHandlers,
+          prepareSendMessagesRequest(request) {
+            return {
+              body: {
+                id: request.id,
+                message: request.messages.at(-1),
+                selectedChatModel: currentModelIdRef.current,
+                selectedVisibilityType: visibilityType,
+                ...request.body,
+              },
+            };
+          },
+        });
+        setTransport(transportInstance);
+      } catch (error) {
+        console.error("[Chat] Failed to initialize DefaultChatTransport:", error);
+        // Transport will remain null, useChat will use default fetch
+      }
+    }).catch((error) => {
+      console.error("[Chat] Failed to import 'ai' module:", error);
+      // Transport will remain null, useChat will use default fetch
     });
   }, [visibilityType]);
 

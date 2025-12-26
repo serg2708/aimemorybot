@@ -311,6 +311,22 @@ export async function POST(request: Request) {
   }
 }
 
+export async function HEAD(request: Request) {
+  try {
+    const session = await auth();
+
+    if (!session?.user) {
+      return new Response(null, { status: 401 });
+    }
+
+    // Return 200 to indicate chat API is available
+    return new Response(null, { status: 200 });
+  } catch (error) {
+    console.error("HEAD /chat error:", error);
+    return new Response(null, { status: 200 }); // Return 200 even on error to avoid blocking UI
+  }
+}
+
 export async function DELETE(request: Request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");

@@ -44,20 +44,25 @@ const THEME_COLOR_SCRIPT = `\
 // Script to suppress known wallet extension conflicts
 const WALLET_ERROR_SUPPRESSION_SCRIPT = `\
 (function() {
-  // Suppress known wallet extension errors
+  // Suppress known wallet extension and external service errors
   var originalError = console.error;
   console.error = function() {
     var args = Array.prototype.slice.call(arguments);
     var message = args.join(' ');
 
-    // List of known wallet extension conflict messages to suppress
+    // List of known wallet extension conflict and external service messages to suppress
     var suppressPatterns = [
       'Cannot set property ethereum',
       'Cannot redefine property: ethereum',
       'Failed to assign ethereum proxy',
       'Invalid property descriptor',
       'Talisman extension has not been configured',
-      'MetaMask encountered an error setting the global Ethereum provider'
+      'MetaMask encountered an error setting the global Ethereum provider',
+      'Coinbase',
+      'coinbase',
+      'analytics',
+      'Failed to fetch',
+      '503 Service Unavailable'
     ];
 
     // Check if error message matches any suppression pattern

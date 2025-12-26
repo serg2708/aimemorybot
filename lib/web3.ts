@@ -109,8 +109,17 @@ export const getWeb3Config = () => {
       console.error("[Web3] Error message:", error.message);
 
       // Check if it's a network-related error (e.g., Coinbase Analytics API 503)
-      if (error.message.includes("fetch") || error.message.includes("503") || error.message.includes("network")) {
-        console.warn("[Web3] Network error detected - external wallet services may be unavailable");
+      if (
+        error.message.includes("fetch") ||
+        error.message.includes("503") ||
+        error.message.includes("network") ||
+        error.message.includes("Coinbase") ||
+        error.message.includes("coinbase") ||
+        error.message.includes("analytics")
+      ) {
+        console.warn(
+          "[Web3] External service error detected (Coinbase Analytics or similar) - continuing in fallback mode"
+        );
       }
     }
 
