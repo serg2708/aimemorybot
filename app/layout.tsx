@@ -46,6 +46,8 @@ const WALLET_ERROR_SUPPRESSION_SCRIPT = `\
 (function() {
   // Suppress known wallet extension and external service errors
   var originalError = console.error;
+  var originalWarn = console.warn;
+
   console.error = function() {
     var args = Array.prototype.slice.call(arguments);
     var message = args.join(' ');
@@ -62,17 +64,43 @@ const WALLET_ERROR_SUPPRESSION_SCRIPT = `\
       'coinbase',
       'analytics',
       'Failed to fetch',
-      '503 Service Unavailable'
+      '503 Service Unavailable',
+      'NetworkError',
+      'Load failed',
+      'fetch failed',
+      'The super constructor must either be null or a function',
+      'class extends',
+      'Cannot read properties of undefined'
     ];
 
     // Check if error message matches any suppression pattern
     var shouldSuppress = suppressPatterns.some(function(pattern) {
-      return message.indexOf(pattern) !== -1;
+      return message.toLowerCase().indexOf(pattern.toLowerCase()) !== -1;
     });
 
     // Only log if not suppressed
     if (!shouldSuppress) {
       originalError.apply(console, args);
+    }
+  };
+
+  console.warn = function() {
+    var args = Array.prototype.slice.call(arguments);
+    var message = args.join(' ');
+
+    // List of warnings to suppress
+    var suppressWarnings = [
+      'Coinbase',
+      'coinbase',
+      'analytics'
+    ];
+
+    var shouldSuppress = suppressWarnings.some(function(pattern) {
+      return message.toLowerCase().indexOf(pattern.toLowerCase()) !== -1;
+    });
+
+    if (!shouldSuppress) {
+      originalWarn.apply(console, args);
     }
   };
 })();`;

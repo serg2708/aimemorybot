@@ -91,12 +91,22 @@ export const getWeb3Config = () => {
   try {
     console.log("[Web3] Initializing RainbowKit config...");
 
-    const config = getDefaultConfig({
-      appName: "AI Memory Box",
-      projectId: projectId || "YOUR_PROJECT_ID", // Fallback for development
-      chains: [autonomysAutoEVM], // Autonomys Auto EVM (EVM-compatible only)
-      ssr: false, // Disable SSR to avoid indexedDB errors on server
-    });
+    // Wrap getDefaultConfig in a try-catch to handle Coinbase Analytics failures
+    let config;
+    try {
+      config = getDefaultConfig({
+        appName: "AI Memory Box",
+        projectId: projectId || "YOUR_PROJECT_ID", // Fallback for development
+        chains: [autonomysAutoEVM], // Autonomys Auto EVM (EVM-compatible only)
+        ssr: false, // Disable SSR to avoid indexedDB errors on server
+      });
+    } catch (initError) {
+      // Log the initialization error but continue anyway
+      console.warn("[Web3] getDefaultConfig encountered an error (likely Coinbase Analytics):", initError);
+
+      // Re-throw to trigger fallback mode
+      throw initError;
+    }
 
     console.log("[Web3] RainbowKit config initialized successfully");
     return config;
@@ -115,7 +125,9 @@ export const getWeb3Config = () => {
         error.message.includes("network") ||
         error.message.includes("Coinbase") ||
         error.message.includes("coinbase") ||
-        error.message.includes("analytics")
+        error.message.includes("analytics") ||
+        error.message.includes("Failed to fetch") ||
+        error.message.includes("NetworkError")
       ) {
         console.warn(
           "[Web3] External service error detected (Coinbase Analytics or similar) - continuing in fallback mode"

@@ -74,6 +74,12 @@ export function Providers({ children }: ProvidersProps) {
       try {
         console.log("[Providers] Starting Web3 initialization...");
         const config = getWeb3Config();
+
+        // Validate config before setting
+        if (!config) {
+          throw new Error("getWeb3Config returned null or undefined");
+        }
+
         setWagmiConfig(config);
         console.log("[Providers] Web3 initialized successfully");
       } catch (err) {
@@ -86,6 +92,17 @@ export function Providers({ children }: ProvidersProps) {
             message: err.message,
             stack: err.stack?.split('\n').slice(0, 3).join('\n')
           });
+
+          // Check for specific error patterns
+          const errorMessage = err.message.toLowerCase();
+          if (
+            errorMessage.includes('class') ||
+            errorMessage.includes('extends') ||
+            errorMessage.includes('super') ||
+            errorMessage.includes('undefined')
+          ) {
+            console.error("[Providers] Detected class inheritance error - likely external library issue");
+          }
         }
 
         console.warn("[Providers] Continuing in fallback mode without Web3 features");
