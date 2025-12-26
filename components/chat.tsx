@@ -70,6 +70,7 @@ export function Chat({
   // Create transport with dynamic import to avoid SSR issues
   // Using 'any' type to prevent "extends undefined" error during SSR
   const [transport, setTransport] = useState<any>(null);
+  const [transportError, setTransportError] = useState<Error | null>(null);
 
   useEffect(() => {
     // Dynamically import DefaultChatTransport only on client side
@@ -91,15 +92,38 @@ export function Chat({
           },
         });
         setTransport(transportInstance);
+        console.log("[Chat] DefaultChatTransport initialized successfully");
       } catch (error) {
-        console.error("[Chat] Failed to initialize DefaultChatTransport:", error);
+        const err = error instanceof Error ? error : new Error(String(error));
+        console.error("[Chat] CRITICAL: Failed to initialize DefaultChatTransport");
+        console.error("[Chat] Error details:", {
+          name: err.name,
+          message: err.message,
+          stack: err.stack
+        });
+        setTransportError(err);
         // Transport will remain null, useChat will use default fetch
       }
     }).catch((error) => {
-      console.error("[Chat] Failed to import 'ai' module:", error);
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error("[Chat] CRITICAL: Failed to import 'ai' module");
+      console.error("[Chat] Error details:", {
+        name: err.name,
+        message: err.message,
+        stack: err.stack
+      });
+      setTransportError(err);
       // Transport will remain null, useChat will use default fetch
     });
   }, [visibilityType]);
+
+  // Warn if transport is not available
+  useEffect(() => {
+    if (transportError) {
+      console.warn("[Chat] Running in fallback mode without DefaultChatTransport");
+      console.warn("[Chat] This may indicate a build or deployment issue");
+    }
+  }, [transportError]);
 
   const {
     messages,

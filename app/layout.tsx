@@ -41,10 +41,10 @@ const THEME_COLOR_SCRIPT = `\
   updateThemeColor();
 })();`;
 
-// Script to suppress known wallet extension conflicts
+// Script to suppress known wallet extension conflicts ONLY
 const WALLET_ERROR_SUPPRESSION_SCRIPT = `\
 (function() {
-  // Suppress known wallet extension and external service errors
+  // Suppress ONLY known wallet extension conflicts that are not critical
   var originalError = console.error;
   var originalWarn = console.warn;
 
@@ -52,25 +52,15 @@ const WALLET_ERROR_SUPPRESSION_SCRIPT = `\
     var args = Array.prototype.slice.call(arguments);
     var message = args.join(' ');
 
-    // List of known wallet extension conflict and external service messages to suppress
+    // List of ONLY wallet extension conflict messages to suppress
+    // DO NOT suppress critical application errors like "class extends" or "undefined"
     var suppressPatterns = [
       'Cannot set property ethereum',
       'Cannot redefine property: ethereum',
       'Failed to assign ethereum proxy',
       'Invalid property descriptor',
       'Talisman extension has not been configured',
-      'MetaMask encountered an error setting the global Ethereum provider',
-      'Coinbase',
-      'coinbase',
-      'analytics',
-      'Failed to fetch',
-      '503 Service Unavailable',
-      'NetworkError',
-      'Load failed',
-      'fetch failed',
-      'The super constructor must either be null or a function',
-      'class extends',
-      'Cannot read properties of undefined'
+      'MetaMask encountered an error setting the global Ethereum provider'
     ];
 
     // Check if error message matches any suppression pattern
@@ -88,11 +78,11 @@ const WALLET_ERROR_SUPPRESSION_SCRIPT = `\
     var args = Array.prototype.slice.call(arguments);
     var message = args.join(' ');
 
-    // List of warnings to suppress
+    // List of warnings to suppress (wallet-related only)
     var suppressWarnings = [
-      'Coinbase',
-      'coinbase',
-      'analytics'
+      'Coinbase Wallet extension',
+      'MetaMask extension',
+      'Talisman extension'
     ];
 
     var shouldSuppress = suppressWarnings.some(function(pattern) {
