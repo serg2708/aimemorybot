@@ -69,6 +69,7 @@
     "orderedmap": "^2.1.1",
     "os-browserify": "^0.3.0",
     "papaparse": "^5.5.2",
+    "pino-pretty": "^10.3.0",
     "postgres": "^3.4.4",
     "process": "^0.11.10",
     "prosemirror-example-setup": "^1.2.3",
