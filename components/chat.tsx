@@ -62,10 +62,15 @@ export function Chat({
   const [showCreditCardAlert, setShowCreditCardAlert] = useState(false);
   const [currentModelId, setCurrentModelId] = useState(initialChatModel);
   const currentModelIdRef = useRef(currentModelId);
+  const visibilityTypeRef = useRef(visibilityType);
 
   useEffect(() => {
     currentModelIdRef.current = currentModelId;
   }, [currentModelId]);
+
+  useEffect(() => {
+    visibilityTypeRef.current = visibilityType;
+  }, [visibilityType]);
 
   // Create transport with dynamic import to avoid SSR issues
   // Using 'any' type to prevent "extends undefined" error during SSR
@@ -85,7 +90,7 @@ export function Chat({
                 id: request.id,
                 message: request.messages.at(-1),
                 selectedChatModel: currentModelIdRef.current,
-                selectedVisibilityType: visibilityType,
+                selectedVisibilityType: visibilityTypeRef.current,
                 ...request.body,
               },
             };
@@ -115,7 +120,7 @@ export function Chat({
       setTransportError(err);
       // Transport will remain null, useChat will use default fetch
     });
-  }, [visibilityType]);
+  }, []);
 
   // Warn if transport is not available
   useEffect(() => {
