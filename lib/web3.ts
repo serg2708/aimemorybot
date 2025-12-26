@@ -79,20 +79,44 @@ export const autonomys = {
 
 /**
  * Get RainbowKit/wagmi configuration - Autonomys Networks only
+ * Includes error handling for external API failures (e.g., Coinbase Analytics)
  */
 export const getWeb3Config = () => {
   const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
 
   if (!projectId) {
-    console.warn("NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID not set");
+    console.warn("[Web3] NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID not set");
   }
 
-  return getDefaultConfig({
-    appName: "AI Memory Box",
-    projectId: projectId || "YOUR_PROJECT_ID", // Fallback for development
-    chains: [autonomysAutoEVM], // Autonomys Auto EVM (EVM-compatible only)
-    ssr: false, // Disable SSR to avoid indexedDB errors on server
-  });
+  try {
+    console.log("[Web3] Initializing RainbowKit config...");
+
+    const config = getDefaultConfig({
+      appName: "AI Memory Box",
+      projectId: projectId || "YOUR_PROJECT_ID", // Fallback for development
+      chains: [autonomysAutoEVM], // Autonomys Auto EVM (EVM-compatible only)
+      ssr: false, // Disable SSR to avoid indexedDB errors on server
+    });
+
+    console.log("[Web3] RainbowKit config initialized successfully");
+    return config;
+  } catch (error) {
+    console.error("[Web3] Failed to initialize RainbowKit config:", error);
+
+    // Log specific error details for debugging
+    if (error instanceof Error) {
+      console.error("[Web3] Error name:", error.name);
+      console.error("[Web3] Error message:", error.message);
+
+      // Check if it's a network-related error (e.g., Coinbase Analytics API 503)
+      if (error.message.includes("fetch") || error.message.includes("503") || error.message.includes("network")) {
+        console.warn("[Web3] Network error detected - external wallet services may be unavailable");
+      }
+    }
+
+    // Re-throw the error so it can be caught by the Providers component
+    throw error;
+  }
 };
 
 /**

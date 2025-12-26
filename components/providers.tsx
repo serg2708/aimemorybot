@@ -53,6 +53,7 @@ export function Providers({ children }: ProvidersProps) {
   const [mounted, setMounted] = useState(false);
   const [wagmiConfig, setWagmiConfig] = useState<ReturnType<typeof getWeb3Config> | null>(null);
   const [initError, setInitError] = useState<Error | null>(null);
+  const [fallbackMode, setFallbackMode] = useState(false);
 
   // Create QueryClient only once
   const [queryClient] = useState(
@@ -73,9 +74,12 @@ export function Providers({ children }: ProvidersProps) {
       try {
         const config = getWeb3Config();
         setWagmiConfig(config);
+        console.log("[Providers] Web3 initialized successfully");
       } catch (err) {
         console.error("[Providers] Failed to initialize Web3:", err);
+        console.warn("[Providers] Continuing in fallback mode without Web3 features");
         setInitError(err as Error);
+        setFallbackMode(true);
       }
     }
     setMounted(true);
@@ -86,9 +90,24 @@ export function Providers({ children }: ProvidersProps) {
     return null;
   }
 
-  // Show error screen if config creation failed
-  if (initError || (!wagmiConfig && mounted)) {
-    return <ErrorScreen error={initError || new Error("Failed to create Web3 config")} />;
+  // If in fallback mode, render without Web3 providers
+  if (fallbackMode) {
+    return (
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        disableTransitionOnChange
+        enableSystem
+      >
+        <div className="relative">
+          {/* Warning banner for missing Web3 functionality */}
+          <div className="sticky top-0 z-50 border-b border-yellow-200 bg-yellow-50 px-4 py-2 text-center text-sm text-yellow-800 dark:border-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-200">
+            ⚠️ Wallet features temporarily unavailable. Chat functionality is working normally.
+          </div>
+          {children}
+        </div>
+      </ThemeProvider>
+    );
   }
 
   // Wait for wagmiConfig to be ready
