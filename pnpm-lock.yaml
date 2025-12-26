@@ -73,7 +73,7 @@ importers:
         version: 5.90.7(react@19.0.0-rc-45804af1-20241021)
       '@vercel/analytics':
         specifier: ^1.3.1
-        version: 1.5.0(next@15.5.7(@opentelemetry/api@1.9.0)(@playwright/test@1.51.0)(react-dom@19.0.0-rc-45804af1-20241021(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021)
+        version: 1.5.0(next@15.5.9(@opentelemetry/api@1.9.0)(@playwright/test@1.51.0)(react-dom@19.0.0-rc-45804af1-20241021(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021)
       '@vercel/blob':
         specifier: ^0.24.1
         version: 0.24.1
@@ -130,7 +130,7 @@ importers:
         version: 11.18.2(react-dom@19.0.0-rc-45804af1-20241021(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021)
       geist:
         specifier: ^1.3.1
-        version: 1.3.1(next@15.5.7(@opentelemetry/api@1.9.0)(@playwright/test@1.51.0)(react-dom@19.0.0-rc-45804af1-20241021(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021))
+        version: 1.3.1(next@15.5.9(@opentelemetry/api@1.9.0)(@playwright/test@1.51.0)(react-dom@19.0.0-rc-45804af1-20241021(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021))
       https-browserify:
         specifier: ^1.0.0
         version: 1.0.0
@@ -144,11 +144,11 @@ importers:
         specifier: ^5.0.8
         version: 5.1.3
       next:
-        specifier: 15.5.7
-        version: 15.5.7(@opentelemetry/api@1.9.0)(@playwright/test@1.51.0)(react-dom@19.0.0-rc-45804af1-20241021(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021)
+        specifier: 15.5.9
+        version: 15.5.9(@opentelemetry/api@1.9.0)(@playwright/test@1.51.0)(react-dom@19.0.0-rc-45804af1-20241021(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021)
       next-auth:
         specifier: 5.0.0-beta.25
-        version: 5.0.0-beta.25(next@15.5.7(@opentelemetry/api@1.9.0)(@playwright/test@1.51.0)(react-dom@19.0.0-rc-45804af1-20241021(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021)
+        version: 5.0.0-beta.25(next@15.5.9(@opentelemetry/api@1.9.0)(@playwright/test@1.51.0)(react-dom@19.0.0-rc-45804af1-20241021(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021)
       next-themes:
         specifier: ^0.3.0
         version: 0.3.0(react-dom@19.0.0-rc-45804af1-20241021(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021)
@@ -1340,8 +1340,8 @@ packages:
   '@neondatabase/serverless@0.9.5':
     resolution: {integrity: sha512-siFas6gItqv6wD/pZnvdu34wEqgG3nSE6zWZdq5j2DEsa+VvX8i/5HXJOo06qrw5axPXn+lGCxeR+NLaSPIXug==}
 
-  '@next/env@15.5.7':
-    resolution: {integrity: sha512-4h6Y2NyEkIEN7Z8YxkA27pq6zTkS09bUSYC0xjd0NpwFxjnIKeZEeH591o5WECSmjpUhLn3H2QLJcDye3Uzcvg==}
+  '@next/env@15.5.9':
+    resolution: {integrity: sha512-4GlTZ+EJM7WaW2HEZcyU317tIQDjkQIyENDLxYJfSWlfqguN+dHkZgyQTV/7ykvobU7yEH5gKvreNrH4B6QgIg==}
 
   '@next/swc-darwin-arm64@15.5.7':
     resolution: {integrity: sha512-IZwtxCEpI91HVU/rAUOOobWSZv4P2DeTtNaCdHqLcTJU4wdNXgAySvKa/qJCgR5m6KI8UsKDXtO2B31jcaw1Yw==}
@@ -4276,10 +4276,6 @@ packages:
   detect-browser@5.3.0:
     resolution: {integrity: sha512-53rsFbGdwMwlF7qvCt0ypLM5V5/Mbl0szB7GPN8y9NCcbknYOeVVXdrXEq+90IwAfrrzt6Hd+u2E2ntakICU8w==}
 
-  detect-libc@2.0.3:
-    resolution: {integrity: sha512-bwy0MGW55bG41VqxxypOsdSdGqLwXPI/focwgTYCFMbdUiBAxLg9CFzG08sz2aqzknwiX7Hkl0bQENjg8iLByw==}
-    engines: {node: '>=8'}
-
   detect-libc@2.1.2:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
@@ -5537,8 +5533,8 @@ packages:
       react: ^16.8 || ^17 || ^18
       react-dom: ^16.8 || ^17 || ^18
 
-  next@15.5.7:
-    resolution: {integrity: sha512-+t2/0jIJ48kUpGKkdlhgkv+zPTEOoXyr60qXe68eB/pl3CMJaLeIGjzp5D6Oqt25hCBiBTt8wEeeAzfJvUKnPQ==}
+  next@15.5.9:
+    resolution: {integrity: sha512-agNLK89seZEtC5zUHwtut0+tNrc0Xw4FT/Dg+B/VLEo9pAcS9rtTKpek3V6kVcVwsB2YlqMaHdfZL4eLEVYuCg==}
     engines: {node: ^18.18.0 || ^19.8.0 || >= 20.0.0}
     hasBin: true
     peerDependencies:
@@ -8198,7 +8194,7 @@ snapshots:
       '@types/pg': 8.11.6
     optional: true
 
-  '@next/env@15.5.7': {}
+  '@next/env@15.5.9': {}
 
   '@next/swc-darwin-arm64@15.5.7':
     optional: true
@@ -10767,9 +10763,9 @@ snapshots:
     dependencies:
       '@vanilla-extract/css': 1.17.3
 
-  '@vercel/analytics@1.5.0(next@15.5.7(@opentelemetry/api@1.9.0)(@playwright/test@1.51.0)(react-dom@19.0.0-rc-45804af1-20241021(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021)':
+  '@vercel/analytics@1.5.0(next@15.5.9(@opentelemetry/api@1.9.0)(@playwright/test@1.51.0)(react-dom@19.0.0-rc-45804af1-20241021(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021)':
     optionalDependencies:
-      next: 15.5.7(@opentelemetry/api@1.9.0)(@playwright/test@1.51.0)(react-dom@19.0.0-rc-45804af1-20241021(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021)
+      next: 15.5.9(@opentelemetry/api@1.9.0)(@playwright/test@1.51.0)(react-dom@19.0.0-rc-45804af1-20241021(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021)
       react: 19.0.0-rc-45804af1-20241021
 
   '@vercel/blob@0.24.1':
@@ -12190,10 +12186,7 @@ snapshots:
 
   detect-browser@5.3.0: {}
 
-  detect-libc@2.0.3: {}
-
-  detect-libc@2.1.2:
-    optional: true
+  detect-libc@2.1.2: {}
 
   detect-node-es@1.1.0: {}
 
@@ -12592,9 +12585,9 @@ snapshots:
 
   function-bind@1.1.2: {}
 
-  geist@1.3.1(next@15.5.7(@opentelemetry/api@1.9.0)(@playwright/test@1.51.0)(react-dom@19.0.0-rc-45804af1-20241021(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021)):
+  geist@1.3.1(next@15.5.9(@opentelemetry/api@1.9.0)(@playwright/test@1.51.0)(react-dom@19.0.0-rc-45804af1-20241021(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021)):
     dependencies:
-      next: 15.5.7(@opentelemetry/api@1.9.0)(@playwright/test@1.51.0)(react-dom@19.0.0-rc-45804af1-20241021(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021)
+      next: 15.5.9(@opentelemetry/api@1.9.0)(@playwright/test@1.51.0)(react-dom@19.0.0-rc-45804af1-20241021(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021)
 
   generator-function@2.0.1: {}
 
@@ -13131,7 +13124,7 @@ snapshots:
 
   lightningcss@1.30.2:
     dependencies:
-      detect-libc: 2.0.3
+      detect-libc: 2.1.2
     optionalDependencies:
       lightningcss-android-arm64: 1.30.2
       lightningcss-darwin-arm64: 1.30.2
@@ -13717,10 +13710,10 @@ snapshots:
 
   nanoid@5.1.3: {}
 
-  next-auth@5.0.0-beta.25(next@15.5.7(@opentelemetry/api@1.9.0)(@playwright/test@1.51.0)(react-dom@19.0.0-rc-45804af1-20241021(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021):
+  next-auth@5.0.0-beta.25(next@15.5.9(@opentelemetry/api@1.9.0)(@playwright/test@1.51.0)(react-dom@19.0.0-rc-45804af1-20241021(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021):
     dependencies:
       '@auth/core': 0.37.2
-      next: 15.5.7(@opentelemetry/api@1.9.0)(@playwright/test@1.51.0)(react-dom@19.0.0-rc-45804af1-20241021(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021)
+      next: 15.5.9(@opentelemetry/api@1.9.0)(@playwright/test@1.51.0)(react-dom@19.0.0-rc-45804af1-20241021(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021)
       react: 19.0.0-rc-45804af1-20241021
 
   next-themes@0.3.0(react-dom@19.0.0-rc-45804af1-20241021(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021):
@@ -13728,9 +13721,9 @@ snapshots:
       react: 19.0.0-rc-45804af1-20241021
       react-dom: 19.0.0-rc-45804af1-20241021(react@19.0.0-rc-45804af1-20241021)
 
-  next@15.5.7(@opentelemetry/api@1.9.0)(@playwright/test@1.51.0)(react-dom@19.0.0-rc-45804af1-20241021(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021):
+  next@15.5.9(@opentelemetry/api@1.9.0)(@playwright/test@1.51.0)(react-dom@19.0.0-rc-45804af1-20241021(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021):
     dependencies:
-      '@next/env': 15.5.7
+      '@next/env': 15.5.9
       '@swc/helpers': 0.5.15
       caniuse-lite: 1.0.30001704
       postcss: 8.4.31
