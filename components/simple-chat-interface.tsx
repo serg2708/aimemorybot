@@ -33,8 +33,8 @@ export default function SimpleChatInterface({
   const [input, setInput] = useState<string>("");
   const [usage, setUsage] = useState<AppUsage | undefined>(undefined);
   const [showCreditCardAlert, setShowCreditCardAlert] = useState(false);
-  // Fixed to Claude 3.5 Sonnet
-  const [currentModelId] = useState("claude-3-5-sonnet-20241022");
+  // Fixed to Grok Vision model
+  const [currentModelId] = useState("chat-model");
   const currentModelIdRef = useRef(currentModelId);
   const visibilityType = "private";
   const visibilityTypeRef = useRef(visibilityType);
@@ -134,7 +134,7 @@ export default function SimpleChatInterface({
               AI Chat
             </h1>
             <p className="text-gray-600 text-sm dark:text-gray-400">
-              Powered by Claude 3.5 Sonnet
+              Powered by Grok Vision
             </p>
           </div>
         </div>
