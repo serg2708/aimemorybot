@@ -14,7 +14,6 @@ import { ChatSDKError } from "@/lib/errors";
 import type { Attachment, ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
 import { fetcher, fetchWithErrorHandlers } from "@/lib/utils";
-import { Artifact } from "./artifact";
 import { useDataStream } from "./data-stream-provider";
 import { Messages } from "./messages";
 import { MultimodalInput } from "./multimodal-input";
@@ -217,25 +216,6 @@ export default function SimpleChatInterface({
           usage={usage}
         />
       </div>
-
-      {/* Artifact Sidebar */}
-      <Artifact
-        attachments={attachments}
-        chatId={chatId}
-        input={input}
-        isReadonly={false}
-        messages={messages}
-        regenerate={regenerate}
-        selectedModelId={currentModelId}
-        selectedVisibilityType={visibilityType}
-        sendMessage={sendMessage}
-        setAttachments={setAttachments}
-        setInput={setInput}
-        setMessages={setMessages}
-        status={status}
-        stop={stop}
-        votes={votes}
-      />
     </div>
   );
 }
