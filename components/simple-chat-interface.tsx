@@ -76,53 +76,46 @@ export default function SimpleChatInterface({
   const {
     messages,
     setMessages,
-    handleSubmit,
-    reload,
+    sendMessage,
+    status,
     stop,
-    isLoading,
-    append,
-    data: streamData,
-  } = useChat({
+    regenerate,
+  } = useChat<ChatMessage>({
     id: chatId,
-    body: { id: chatId },
-    initialMessages: [],
+    messages: [],
     experimental_throttle: 100,
     transport: transport || undefined,
-    onResponse(response) {
-      if (response.status === 401) {
-        window.location.href = "/api/auth/guest";
+    onData: (dataPart) => {
+      setDataStream((ds) => (ds ? [...ds, dataPart] : []));
+      if (dataPart.type === "data-usage") {
+        setUsage(dataPart.data);
       }
     },
-    onFinish(message) {
+    onFinish: () => {
       mutate(unstable_serialize(getChatHistoryPaginationKey));
     },
-    onError(error) {
+    onError: (error) => {
       if (error instanceof ChatSDKError) {
         console.error("[SimpleChatInterface] Chat SDK error:", error);
-        if (error.code === "PAYMENT_REQUIRED") {
+        if (error.message?.includes("AI Gateway requires a valid credit card")) {
           setShowCreditCardAlert(true);
-          return;
+        } else {
+          toast({
+            type: "error",
+            description: error.message,
+          });
         }
-
-        toast({
-          title: "Error",
-          description: error.message,
-        });
       } else {
         console.error("[SimpleChatInterface] Unexpected error:", error);
         toast({
-          title: "Error",
+          type: "error",
           description: "An unexpected error occurred. Please try again.",
         });
       }
     },
   });
 
-  useEffect(() => {
-    if (streamData) {
-      setDataStream(streamData);
-    }
-  }, [streamData, setDataStream]);
+  const isLoading = status === "in_progress" || status === "streaming";
 
   const { data: votes } = useSWR<Array<Vote>>(
     `/api/vote?chatId=${chatId}`,
@@ -193,10 +186,13 @@ export default function SimpleChatInterface({
         ) : (
           <Messages
             chatId={chatId}
-            isLoading={isLoading}
+            isArtifactVisible={false}
+            isReadonly={false}
             messages={messages}
-            reload={reload}
+            regenerate={regenerate}
+            selectedModelId={currentModelId}
             setMessages={setMessages}
+            status={status}
             votes={votes}
           />
         )}
@@ -204,19 +200,22 @@ export default function SimpleChatInterface({
 
       {/* Input Area */}
       <div className="border-t border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-        <form className="relative" onSubmit={handleSubmit}>
-          <MultimodalInput
-            append={append}
-            attachments={attachments}
-            handleSubmit={handleSubmit}
-            input={input}
-            isLoading={isLoading}
-            messages={messages}
-            setAttachments={setAttachments}
-            setInput={setInput}
-            stop={stop}
-          />
-        </form>
+        <MultimodalInput
+          attachments={attachments}
+          chatId={chatId}
+          input={input}
+          messages={messages}
+          onModelChange={setCurrentModelId}
+          selectedModelId={currentModelId}
+          selectedVisibilityType={visibilityType}
+          sendMessage={sendMessage}
+          setAttachments={setAttachments}
+          setInput={setInput}
+          setMessages={setMessages}
+          status={status}
+          stop={stop}
+          usage={usage}
+        />
       </div>
 
       {/* Artifact Sidebar */}

@@ -8,6 +8,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { DataStreamHandler } from "@/components/data-stream-handler";
+import { DataStreamProvider } from "@/components/data-stream-provider";
 import { WalletConnect } from "@/components/wallet-connect";
 import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
 import { generateUUID } from "@/lib/utils";
@@ -24,44 +25,46 @@ export default function ChatPageClient() {
   const [chatId] = useState(() => generateUUID());
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-      {/* Header */}
-      <div className="border-b border-gray-200 bg-white/50 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800/50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link
-              className="font-bold text-2xl transition-opacity hover:opacity-80"
-              href="/"
-            >
-              AI Memory Box
-            </Link>
-            <div className="flex items-center gap-4">
+    <DataStreamProvider>
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+        {/* Header */}
+        <div className="border-b border-gray-200 bg-white/50 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800/50">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
               <Link
-                className="font-medium text-sm hover:underline"
-                href="/pricing"
+                className="font-bold text-2xl transition-opacity hover:opacity-80"
+                href="/"
               >
-                Pricing
+                AI Memory Box
               </Link>
-              <Link
-                className="font-medium text-sm hover:underline"
-                href="/dashboard"
-              >
-                Dashboard
-              </Link>
-              <WalletConnect />
+              <div className="flex items-center gap-4">
+                <Link
+                  className="font-medium text-sm hover:underline"
+                  href="/pricing"
+                >
+                  Pricing
+                </Link>
+                <Link
+                  className="font-medium text-sm hover:underline"
+                  href="/dashboard"
+                >
+                  Dashboard
+                </Link>
+                <WalletConnect />
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Chat Interface */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="mx-auto max-w-5xl">
-          <SimpleChatInterface chatId={chatId} initialChatModel={chatModel} />
+        {/* Chat Interface */}
+        <div className="container mx-auto px-4 py-8">
+          <div className="mx-auto max-w-5xl">
+            <SimpleChatInterface chatId={chatId} initialChatModel={chatModel} />
+          </div>
         </div>
-      </div>
 
-      <DataStreamHandler />
-    </div>
+        <DataStreamHandler />
+      </div>
+    </DataStreamProvider>
   );
 }
