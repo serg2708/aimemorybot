@@ -115,7 +115,7 @@ export default function SimpleChatInterface({
     },
   });
 
-  const isLoading = status === "in_progress" || status === "streaming";
+  const isLoading = status === "submitted" || status === "streaming";
 
   const { data: votes } = useSWR<Array<Vote>>(
     `/api/vote?chatId=${chatId}`,
