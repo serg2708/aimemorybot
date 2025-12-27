@@ -32,5 +32,7 @@ export const myProvider = isTestEnvironment
         }),
         "title-model": gateway.languageModel("xai/grok-2-1212"),
         "artifact-model": gateway.languageModel("xai/grok-2-1212"),
+        "claude-sonnet-4.5": gateway.languageModel("anthropic/claude-sonnet-4-5"),
+        "claude-sonnet-3.5": gateway.languageModel("anthropic/claude-3-5-sonnet-20241022"),
       },
     });
