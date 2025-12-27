@@ -33,7 +33,8 @@ export default function SimpleChatInterface({
   const [input, setInput] = useState<string>("");
   const [usage, setUsage] = useState<AppUsage | undefined>(undefined);
   const [showCreditCardAlert, setShowCreditCardAlert] = useState(false);
-  const [currentModelId, setCurrentModelId] = useState(initialChatModel);
+  // Fixed to Claude 3.5 Sonnet
+  const [currentModelId] = useState("claude-3-5-sonnet-20241022");
   const currentModelIdRef = useRef(currentModelId);
   const visibilityType = "private";
   const visibilityTypeRef = useRef(visibilityType);
@@ -126,30 +127,15 @@ export default function SimpleChatInterface({
   return (
     <div className="flex h-[calc(100vh-12rem)] flex-col rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800">
       {/* Simple Header */}
-      <div className="border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 dark:border-gray-700 dark:from-gray-800 dark:to-gray-800">
+      <div className="rounded-t-2xl border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 dark:border-gray-700 dark:from-gray-800 dark:to-gray-800">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="font-bold text-xl text-gray-900 dark:text-white">
               AI Chat
             </h1>
             <p className="text-gray-600 text-sm dark:text-gray-400">
-              Start a conversation with AI
+              Powered by Claude 3.5 Sonnet
             </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <label className="text-gray-700 text-sm font-medium dark:text-gray-300">
-              Model:
-            </label>
-            <select
-              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm transition-all hover:border-blue-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:hover:border-blue-400"
-              onChange={(e) => setCurrentModelId(e.target.value)}
-              value={currentModelId}
-            >
-              <option value="gpt-4o">GPT-4o</option>
-              <option value="gpt-4o-mini">GPT-4o Mini</option>
-              <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
-              <option value="grok-2-1212">Grok 2</option>
-            </select>
           </div>
         </div>
       </div>
@@ -198,13 +184,12 @@ export default function SimpleChatInterface({
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+      <div className="rounded-b-2xl border-t border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
         <MultimodalInput
           attachments={attachments}
           chatId={chatId}
           input={input}
           messages={messages}
-          onModelChange={setCurrentModelId}
           selectedModelId={currentModelId}
           selectedVisibilityType={visibilityType}
           sendMessage={sendMessage}
