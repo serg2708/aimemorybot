@@ -5,12 +5,21 @@
 
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { NetworkStatus } from "@/components/network-status";
-import { StorageStatus } from "@/components/storage-status";
 import { SubscriptionCard } from "@/components/subscription-badge";
 import { WalletConnect } from "@/components/wallet-connect";
+
+// Dynamic import to prevent SSR issues with AutoDrive
+const StorageStatus = dynamic(
+  () =>
+    import("@/components/storage-status").then((mod) => ({
+      default: mod.StorageStatus,
+    })),
+  { ssr: false }
+);
 import { useAccount } from "@/hooks/use-web3-safe";
 import { getLocalChats, saveChat } from "@/lib/chat-persistence";
 import { exportAllData, handleFileImport } from "@/lib/export-import";

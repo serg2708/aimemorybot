@@ -4,8 +4,6 @@
  */
 
 import type { AutoDriveApi } from "@autonomys/auto-drive";
-import { createAutoDriveApi } from "@autonomys/auto-drive";
-import { NetworkId } from "@autonomys/auto-utils";
 import { DSNError, handleError, retryDSNOperation } from "./error-handling";
 import {
   notifyAPIKeyMissing,
@@ -33,7 +31,6 @@ let autoDriveInstance: AutoDriveApi | null = null;
  */
 export const AUTONOMYS_CONFIG = {
   apiKey: process.env.NEXT_PUBLIC_AUTONOMYS_API_KEY,
-  network: NetworkId.MAINNET,
   networkName: "mainnet" as const,
 };
 
@@ -59,10 +56,13 @@ export async function getAutoDrive(): Promise<AutoDriveApi | null> {
       return null;
     }
 
+    // Dynamically import AutoDrive to avoid SSR issues
+    const { createAutoDriveApi } = await import("@autonomys/auto-drive");
+
     // Initialize AutoDrive
     autoDriveInstance = createAutoDriveApi({
       apiKey: AUTONOMYS_CONFIG.apiKey,
-      network: AUTONOMYS_CONFIG.networkName as "mainnet" | "taurus",
+      network: AUTONOMYS_CONFIG.networkName,
     });
 
     console.log("AutoDrive initialized successfully");

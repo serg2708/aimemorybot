@@ -1,17 +1,23 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { memo } from "react";
 import { useWindowSize } from "usehooks-ts";
 import { SidebarToggle } from "@/components/sidebar-toggle";
 import { Button } from "@/components/ui/button";
-import { DSNStatus } from "./dsn-status";
 import { PlusIcon, VercelIcon } from "./icons";
 import { NetworkStatus } from "./network-status";
 import { useSidebar } from "./ui/sidebar";
 import { VisibilitySelector, type VisibilityType } from "./visibility-selector";
 import { HeaderWalletConnect } from "./wallet-connect";
+
+// Dynamic import to prevent SSR issues with AutoDrive
+const DSNStatus = dynamic(
+  () => import("./dsn-status").then((mod) => ({ default: mod.DSNStatus })),
+  { ssr: false }
+);
 
 function PureChatHeader({
   chatId,
