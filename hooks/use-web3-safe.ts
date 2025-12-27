@@ -67,7 +67,10 @@ export function useBalance(parameters?: Parameters<typeof useWagmiBalance>[0]): 
       isInitialLoading: false,
       isRefetching: false,
       isStale: false,
+      isPaused: false,
+      isEnabled: false,
       refetch: async () => ({} as any),
+      promise: Promise.resolve({} as any),
       queryKey: [] as readonly unknown[],
     } as ReturnType<typeof useWagmiBalance>;
   }
