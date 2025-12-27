@@ -72,6 +72,6 @@ export function useBalance(parameters?: Parameters<typeof useWagmiBalance>[0]): 
       refetch: async () => ({} as any),
       promise: Promise.resolve({} as any),
       queryKey: [] as readonly unknown[],
-    } as ReturnType<typeof useWagmiBalance>;
+    } as unknown as ReturnType<typeof useWagmiBalance>;
   }
 }
