@@ -49,6 +49,12 @@ export function StorageStatus() {
         setDsnStatus(status);
       } catch (error) {
         console.error("Error fetching storage info:", error);
+        // Set default disconnected status on error
+        setDsnStatus({
+          connected: false,
+          network: "mainnet",
+          apiKeyConfigured: false,
+        });
       } finally {
         setIsLoading(false);
       }

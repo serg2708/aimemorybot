@@ -57,7 +57,15 @@ export async function getAutoDrive(): Promise<AutoDriveApi | null> {
     }
 
     // Dynamically import AutoDrive to avoid SSR issues
-    const { createAutoDriveApi } = await import("@autonomys/auto-drive");
+    const autoDriveModule = await import("@autonomys/auto-drive");
+
+    // Check if the module loaded correctly
+    if (!autoDriveModule || typeof autoDriveModule.createAutoDriveApi !== 'function') {
+      console.error("AutoDrive module failed to load correctly. Module:", autoDriveModule);
+      return null;
+    }
+
+    const { createAutoDriveApi } = autoDriveModule;
 
     // Initialize AutoDrive
     autoDriveInstance = createAutoDriveApi({
@@ -69,6 +77,10 @@ export async function getAutoDrive(): Promise<AutoDriveApi | null> {
     return autoDriveInstance;
   } catch (error) {
     console.error("Failed to initialize AutoDrive:", error);
+    // Check if it's the specific constructor error
+    if (error instanceof TypeError && error.message.includes("constructor")) {
+      console.error("AutoDrive package has incompatible exports. The package may not work with this Next.js configuration.");
+    }
     return null;
   }
 }
