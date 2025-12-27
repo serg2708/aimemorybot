@@ -219,7 +219,23 @@ export default function SimpleChatInterface({
       </div>
 
       {/* Artifact Sidebar */}
-      <Artifact chatId={chatId} />
+      <Artifact
+        attachments={attachments}
+        chatId={chatId}
+        input={input}
+        isReadonly={false}
+        messages={messages}
+        regenerate={regenerate}
+        selectedModelId={currentModelId}
+        selectedVisibilityType={visibilityType}
+        sendMessage={sendMessage}
+        setAttachments={setAttachments}
+        setInput={setInput}
+        setMessages={setMessages}
+        status={status}
+        stop={stop}
+        votes={votes}
+      />
     </div>
   );
 }
