@@ -38,7 +38,7 @@ export function useAccount(): UseAccountReturnType {
  * Safe wrapper for useBalance hook
  * Returns default values when provider is not available
  */
-export function useBalance(parameters?: Parameters<typeof useWagmiBalance>[0]): UseBalanceReturnType {
+export function useBalance(parameters?: Parameters<typeof useWagmiBalance>[0]): ReturnType<typeof useWagmiBalance> {
   try {
     return useWagmiBalance(parameters);
   } catch (error) {
@@ -53,6 +53,6 @@ export function useBalance(parameters?: Parameters<typeof useWagmiBalance>[0]): 
       status: "error",
       fetchStatus: "idle",
       refetch: async () => ({ data: undefined, error: null, isError: false, isLoading: false, isSuccess: false, status: "error", fetchStatus: "idle" } as any),
-    } as UseBalanceReturnType;
+    } as ReturnType<typeof useWagmiBalance>;
   }
 }
