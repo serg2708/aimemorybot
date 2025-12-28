@@ -11,10 +11,6 @@ const nextConfig: NextConfig = {
     "@autonomys/auto-drive",
     "@autonomys/auto-utils",
   ],
-  // Force @autonomys packages to use browser version
-  experimental: {
-    esmExternals: "loose",
-  },
   images: {
     remotePatterns: [
       {
@@ -28,6 +24,9 @@ const nextConfig: NextConfig = {
     ],
   },
   webpack: (config, { isServer, webpack }) => {
+    // Set resolve conditions to prefer browser exports
+    config.resolve.conditionNames = ['browser', 'import', 'module', 'require', 'default'];
+
     // Ignore React Native dependencies and AutoDrive on server
     if (isServer) {
       // Completely ignore @autonomys/auto-drive on server to prevent SSR errors
@@ -86,14 +85,6 @@ const nextConfig: NextConfig = {
       "react-native-device-info": false,
       "react-native-randombytes": false,
     };
-
-    // Force @autonomys/auto-drive to use browser version on both client and server
-    if (!isServer) {
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        "@autonomys/auto-drive$": require.resolve("@autonomys/auto-drive/dist/browser.js"),
-      };
-    }
 
     // Suppress wallet extension conflicts warnings
     config.ignoreWarnings = [
