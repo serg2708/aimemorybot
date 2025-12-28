@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useAccount } from "wagmi";
-import { getAutoDriveStatus } from "./auto-drive";
+import { getAutoDriveStatus } from "./auto-drive-client";
 import {
   type ChatSession,
   getChatById,

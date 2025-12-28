@@ -7,7 +7,7 @@ import {
   downloadFromAutoDrive,
   isAutoDriveAvailable,
   uploadToAutoDrive,
-} from "./auto-drive";
+} from "./auto-drive-client";
 import { decryptMessages, encryptMessages } from "./encryption";
 
 const STORAGE_PREFIX = "aimemorybox_";

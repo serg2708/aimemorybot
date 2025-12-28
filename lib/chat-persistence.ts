@@ -5,7 +5,7 @@
 
 "use client";
 
-import { downloadFromAutoDrive, uploadToAutoDrive } from "./auto-drive";
+import { downloadFromAutoDrive, uploadToAutoDrive } from "./auto-drive-client";
 import { decryptData, encryptData, isEncryptionAvailable } from "./encryption";
 import { handleError, retryDSNOperation } from "./error-handling";
 import {

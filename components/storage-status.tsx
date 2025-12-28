@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
-import { getAutoDriveStatus } from "@/lib/auto-drive";
+import { getAutoDriveStatus } from "@/lib/auto-drive-client";
 import { getLatestCID, getStorageInfo } from "@/lib/memory-storage";
 import { formatAddress } from "@/lib/web3";
 
