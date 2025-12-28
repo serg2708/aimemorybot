@@ -5,7 +5,9 @@
 
 "use client";
 
-import type { AutoDriveApi } from "@autonomys/auto-drive";
+// Use dynamic type to avoid importing from @autonomys/auto-drive at module level
+type AutoDriveApi = any;
+
 import { DSNError, handleError, retryDSNOperation } from "./error-handling";
 import {
   notifyAPIKeyMissing,
@@ -17,6 +19,7 @@ import {
 // Cache the AutoDrive instance
 let autoDriveInstance: AutoDriveApi | null = null;
 let initPromise: Promise<AutoDriveApi | null> | null = null;
+let initFailed = false; // Track if initialization has failed
 
 /**
  * Configuration for Autonomys DSN
@@ -35,6 +38,11 @@ export async function getAutoDrive(): Promise<AutoDriveApi | null> {
     return autoDriveInstance;
   }
 
+  // Don't retry if initialization already failed
+  if (initFailed) {
+    return null;
+  }
+
   // Return existing promise if initialization is in progress
   if (initPromise) {
     return initPromise;
@@ -49,6 +57,7 @@ export async function getAutoDrive(): Promise<AutoDriveApi | null> {
   // Check if API key is available
   if (!AUTONOMYS_CONFIG.apiKey) {
     console.warn("NEXT_PUBLIC_AUTONOMYS_API_KEY is not configured");
+    initFailed = true;
     return null;
   }
 
@@ -61,6 +70,7 @@ export async function getAutoDrive(): Promise<AutoDriveApi | null> {
       // Check if the module loaded correctly
       if (!autoDriveModule || typeof autoDriveModule.createAutoDriveApi !== "function") {
         console.error("AutoDrive module failed to load correctly. Module:", autoDriveModule);
+        initFailed = true;
         return null;
       }
 
@@ -68,7 +78,7 @@ export async function getAutoDrive(): Promise<AutoDriveApi | null> {
 
       // Initialize AutoDrive
       const instance = createAutoDriveApi({
-        apiKey: AUTONOMYS_CONFIG.apiKey!,
+        apiKey: AUTONOMYS_CONFIG.apiKey || "",
         network: AUTONOMYS_CONFIG.networkName,
       });
 
@@ -76,9 +86,11 @@ export async function getAutoDrive(): Promise<AutoDriveApi | null> {
       console.log("AutoDrive initialized successfully");
       return instance;
     } catch (error) {
+      initFailed = true;
       console.error("Failed to initialize AutoDrive:", error);
       if (error instanceof TypeError && error.message.includes("constructor")) {
         console.error("AutoDrive package has incompatible exports. The package may not work with this Next.js configuration.");
+        console.warn("AutoDrive will be disabled. Subscription features will work without it.");
       }
       return null;
     } finally {

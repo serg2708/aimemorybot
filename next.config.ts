@@ -24,9 +24,6 @@ const nextConfig: NextConfig = {
     ],
   },
   webpack: (config, { isServer, webpack }) => {
-    // Set resolve conditions to prefer browser exports
-    config.resolve.conditionNames = ['browser', 'import', 'module', 'require', 'default'];
-
     // Ignore React Native dependencies and AutoDrive on server
     if (isServer) {
       // Completely ignore @autonomys/auto-drive on server to prevent SSR errors
