@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SubscriptionCard } from "@/components/subscription-badge";
 import { WalletConnect } from "@/components/wallet-connect";
 import { useAccount } from "@/hooks/use-web3-safe";
@@ -29,6 +29,17 @@ export default function PricingPage() {
   const { subscribe, isPending, isConfirming, isSuccess, error } =
     useSubscribe();
 
+  // Reload page after successful subscription
+  useEffect(() => {
+    if (isSuccess) {
+      // Wait a bit for blockchain confirmation
+      const timeout = setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [isSuccess]);
+
   const handleSubscribe = async (plan: SubscriptionPlan) => {
     if (!isConnected) {
       alert("Please connect your wallet first");
@@ -46,7 +57,7 @@ export default function PricingPage() {
       });
       const result = await subscribe(plan, duration, amount);
       console.log("Subscription result:", result);
-      alert("Subscription successful! Transaction submitted.");
+      // Don't show alert here - useEffect will reload the page when isSuccess becomes true
     } catch (err: any) {
       console.error("Subscription failed:", err);
       const errorMessage = err?.message || err?.toString() || "Unknown error";
@@ -202,14 +213,18 @@ export default function PricingPage() {
                         ? "bg-blue-600 text-white hover:bg-blue-700"
                         : "bg-gray-900 text-white hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
                     } disabled:cursor-not-allowed disabled:opacity-50`}
-                    disabled={!isConnected || isPending || isConfirming}
+                    disabled={!isConnected || isPending || isConfirming || isSuccess}
                     onClick={() => handleSubscribe(plan)}
                   >
-                    {isConnected
-                      ? isPending || isConfirming
-                        ? "Processing..."
-                        : "Subscribe"
-                      : "Connect Wallet"}
+                    {!isConnected
+                      ? "Connect Wallet"
+                      : isPending
+                      ? "Waiting for signature..."
+                      : isConfirming
+                      ? "Confirming transaction..."
+                      : isSuccess
+                      ? "Success! Reloading..."
+                      : "Subscribe"}
                   </button>
                 )}
               </div>
