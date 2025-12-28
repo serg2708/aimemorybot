@@ -67,9 +67,19 @@ export function SubscriptionBadge() {
  */
 export function SubscriptionCard() {
   const { address } = useAccount();
-  const { subscription, isActive, daysLeft, isLoading } = useSubscription();
+  const { subscription, isActive, daysLeft, isLoading, error } = useSubscription();
   const { cancel, isPending: isCancelling } = useCancelSubscription();
   const [showManageModal, setShowManageModal] = useState(false);
+
+  // Debug logging
+  console.log("[SubscriptionCard] State:", {
+    address,
+    subscription,
+    isActive,
+    daysLeft,
+    isLoading,
+    error,
+  });
 
   if (!address) {
     return (
