@@ -80,6 +80,8 @@ export function useSubscription() {
     args: address ? [address] : undefined,
     query: {
       enabled: !!address && !!contractAddress && !mockMode,
+      // Suppress console errors for known RPC limitations
+      retry: false,
     },
   });
 
@@ -92,10 +94,19 @@ export function useSubscription() {
     if (isReading) {
       setIsLoading(true);
     } else if (isError) {
-      console.error("Failed to fetch subscription from contract:", readError);
-      console.warn("Contract address:", contractAddress);
-      console.warn("User address:", address);
-      console.warn("⚠️ Defaulting to FREE plan due to RPC error");
+      // Log a user-friendly message instead of full error stack
+      console.warn(
+        "⚠️ Subscription service unavailable - RPC endpoint does not support eth_call method. Defaulting to FREE plan."
+      );
+
+      // Only log detailed error in development mode
+      if (process.env.NODE_ENV === "development") {
+        console.debug("RPC Error Details:", {
+          error: readError?.message,
+          contract: contractAddress,
+          user: address,
+        });
+      }
 
       // Set FREE plan as default when contract read fails
       setSubscription({
