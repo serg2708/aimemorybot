@@ -11,6 +11,9 @@ const nextConfig: NextConfig = {
     "@autonomys/auto-drive",
     "@autonomys/auto-utils",
   ],
+  // Empty turbopack config to silence Next.js 16 warning
+  // Our webpack config is for fallback compatibility only
+  turbopack: {},
   images: {
     remotePatterns: [
       {
