@@ -21,7 +21,7 @@ const StorageStatus = dynamic(
   { ssr: false }
 );
 import { useAccount } from "@/hooks/use-web3-safe";
-import { getLocalChats, saveChat } from "@/lib/chat-persistence";
+import { saveChat } from "@/lib/chat-persistence";
 import { exportAllData, handleFileImport } from "@/lib/export-import";
 import {
   formatPaymentAmount,
@@ -146,7 +146,7 @@ export default function DashboardPage() {
               <div className="mt-4 border-gray-200 border-t pt-4 dark:border-gray-700">
                 <Link
                   className="inline-flex items-center gap-2 text-blue-600 text-sm hover:underline dark:text-blue-400"
-                  href="/"
+                  href="/pricing"
                 >
                   View all plans
                   <svg
@@ -260,7 +260,7 @@ export default function DashboardPage() {
                 </Link>
                 <Link
                   className="block w-full rounded-lg bg-gray-100 px-4 py-3 text-center font-medium transition-colors hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"
-                  href="/"
+                  href="/pricing"
                 >
                   View Plans
                 </Link>
