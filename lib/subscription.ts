@@ -95,6 +95,14 @@ export function useSubscription() {
       console.error("Failed to fetch subscription from contract:", readError);
       console.warn("Contract address:", contractAddress);
       console.warn("User address:", address);
+      console.warn("⚠️ Defaulting to FREE plan due to RPC error");
+
+      // Set FREE plan as default when contract read fails
+      setSubscription({
+        plan: SubscriptionPlan.FREE,
+        expiresAt: 0,
+        isPaused: false,
+      });
       setError(new Error("Failed to fetch subscription"));
       setIsLoading(false);
     } else if (data) {
