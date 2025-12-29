@@ -101,7 +101,7 @@ export function useSubscription() {
       setSubscription({
         plan: SubscriptionPlan.FREE,
         expiresAt: 0,
-        isPaused: false,
+        isActive: false,
       });
       setError(new Error("Failed to fetch subscription"));
       setIsLoading(false);
