@@ -30,10 +30,16 @@ import {
   type PaymentTracker,
 } from "@/lib/payment";
 import { getAI3TokenName } from "@/lib/web3";
+import {
+  formatDuration,
+  formatSubscriptionEvent,
+  useSubscriptionEvents,
+} from "@/lib/subscription-events";
 
 export default function DashboardPage() {
   const { address, isConnected, chain } = useAccount();
   const [paymentHistory, setPaymentHistory] = useState<PaymentTracker[]>([]);
+  const { events: subscriptionEvents, isLoading: eventsLoading } = useSubscriptionEvents();
   const tokenName = getAI3TokenName();
 
   useEffect(() => {
@@ -168,9 +174,14 @@ export default function DashboardPage() {
 
             {/* Payment History */}
             <div className="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
-              <h2 className="mb-4 font-semibold text-xl">Payment History</h2>
+              <h2 className="mb-4 font-semibold text-xl">Subscription History</h2>
 
-              {paymentHistory.length === 0 ? (
+              {eventsLoading ? (
+                <div className="py-8 text-center">
+                  <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600" />
+                  <p className="mt-3 text-gray-500 text-sm">Loading history...</p>
+                </div>
+              ) : subscriptionEvents.length === 0 && paymentHistory.length === 0 ? (
                 <div className="py-8 text-center text-gray-500 dark:text-gray-400">
                   <svg
                     className="mx-auto mb-3 h-12 w-12 opacity-50"
@@ -185,10 +196,61 @@ export default function DashboardPage() {
                       strokeWidth={2}
                     />
                   </svg>
-                  <p>No payment history yet</p>
+                  <p>No subscription history yet</p>
+                  <p className="mt-1 text-xs">Subscribe to a plan to see your history</p>
                 </div>
               ) : (
                 <div className="space-y-3">
+                  {/* Blockchain events */}
+                  {subscriptionEvents.map((event) => (
+                    <div
+                      className="flex items-center justify-between rounded-lg bg-gray-50 p-4 dark:bg-gray-900"
+                      key={event.transactionHash}
+                    >
+                      <div className="flex-1">
+                        <div className="mb-1 flex items-center gap-3">
+                          <span className="font-medium">
+                            {formatSubscriptionEvent(event)}
+                          </span>
+                          <span className="rounded bg-green-100 px-2 py-0.5 font-medium text-green-700 text-xs dark:bg-green-900 dark:text-green-300">
+                            Confirmed
+                          </span>
+                        </div>
+                        <div className="text-gray-600 text-sm dark:text-gray-400">
+                          {new Date(event.timestamp * 1000).toLocaleDateString()} at{" "}
+                          {new Date(event.timestamp * 1000).toLocaleTimeString()}
+                          {event.duration && (
+                            <span className="ml-2">
+                              • Duration: {formatDuration(event.duration)}
+                            </span>
+                          )}
+                        </div>
+                        <a
+                          className="mt-1 inline-flex items-center gap-1 text-blue-600 text-xs hover:underline dark:text-blue-400"
+                          href={`${chain?.blockExplorers?.default?.url}/tx/${event.transactionHash}`}
+                          rel="noopener noreferrer"
+                          target="_blank"
+                        >
+                          View transaction
+                          <svg
+                            className="h-3 w-3"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                            />
+                          </svg>
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Local payment history */}
                   {paymentHistory.map((payment) => (
                     <div
                       className="flex items-center justify-between rounded-lg bg-gray-50 p-4 dark:bg-gray-900"
