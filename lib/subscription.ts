@@ -71,6 +71,7 @@ export function useSubscription() {
   const {
     data,
     isError,
+    error: readError,
     isLoading: isReading,
   } = useReadContract({
     address: contractAddress as `0x${string}`,
@@ -91,6 +92,9 @@ export function useSubscription() {
     if (isReading) {
       setIsLoading(true);
     } else if (isError) {
+      console.error("Failed to fetch subscription from contract:", readError);
+      console.warn("Contract address:", contractAddress);
+      console.warn("User address:", address);
       setError(new Error("Failed to fetch subscription"));
       setIsLoading(false);
     } else if (data) {
@@ -99,7 +103,7 @@ export function useSubscription() {
     } else {
       setIsLoading(false);
     }
-  }, [data, isError, isReading, mockMode]);
+  }, [data, isError, isReading, mockMode, readError, contractAddress, address]);
 
   // Return mock data if in mock mode
   if (mockMode) {
