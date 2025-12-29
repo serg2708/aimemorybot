@@ -64,17 +64,28 @@ export async function getAutoDrive(): Promise<AutoDriveApi | null> {
   // Create initialization promise
   initPromise = (async () => {
     try {
+      console.log("[AutoDrive] Starting initialization...");
+      console.log("[AutoDrive] API Key configured:", !!AUTONOMYS_CONFIG.apiKey);
+      console.log("[AutoDrive] Network:", AUTONOMYS_CONFIG.networkName);
+
       // Dynamically import AutoDrive to avoid SSR issues
       const autoDriveModule = await import("@autonomys/auto-drive");
 
+      console.log("[AutoDrive] Module loaded. Available exports:", Object.keys(autoDriveModule));
+
       // Check if the module loaded correctly
       if (!autoDriveModule || typeof autoDriveModule.createAutoDriveApi !== "function") {
-        console.error("AutoDrive module failed to load correctly. Module:", autoDriveModule);
+        console.error("[AutoDrive] createAutoDriveApi is not a function!");
+        console.error("[AutoDrive] Module type:", typeof autoDriveModule);
+        console.error("[AutoDrive] createAutoDriveApi type:", typeof autoDriveModule.createAutoDriveApi);
+        console.error("[AutoDrive] Full module:", autoDriveModule);
         initFailed = true;
         return null;
       }
 
       const { createAutoDriveApi } = autoDriveModule;
+
+      console.log("[AutoDrive] Calling createAutoDriveApi...");
 
       // Initialize AutoDrive
       const instance = createAutoDriveApi({
@@ -83,14 +94,19 @@ export async function getAutoDrive(): Promise<AutoDriveApi | null> {
       });
 
       autoDriveInstance = instance;
-      console.log("AutoDrive initialized successfully");
+      console.log("[AutoDrive] ✓ Initialized successfully!");
+      console.log("[AutoDrive] Instance methods:", Object.keys(instance));
       return instance;
     } catch (error) {
       initFailed = true;
-      console.error("Failed to initialize AutoDrive:", error);
+      console.error("[AutoDrive] ✗ Initialization failed!");
+      console.error("[AutoDrive] Error type:", error?.constructor?.name);
+      console.error("[AutoDrive] Error message:", error instanceof Error ? error.message : String(error));
+      console.error("[AutoDrive] Error stack:", error instanceof Error ? error.stack : "No stack");
+
       if (error instanceof TypeError && error.message.includes("constructor")) {
-        console.error("AutoDrive package has incompatible exports. The package may not work with this Next.js configuration.");
-        console.warn("AutoDrive will be disabled. Subscription features will work without it.");
+        console.error("[AutoDrive] This appears to be a constructor/class error");
+        console.error("[AutoDrive] The package may have incompatible exports for Next.js");
       }
       return null;
     } finally {
