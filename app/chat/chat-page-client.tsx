@@ -6,13 +6,14 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DataStreamHandler } from "@/components/data-stream-handler";
 import { DataStreamProvider } from "@/components/data-stream-provider";
 import { WalletConnect } from "@/components/wallet-connect";
 import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
 import { generateUUID } from "@/lib/utils";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 
 // Dynamic import to prevent SSR issues
 const SimpleChatInterface = dynamic(
@@ -23,6 +24,44 @@ const SimpleChatInterface = dynamic(
 export default function ChatPageClient() {
   const [chatModel] = useState(DEFAULT_CHAT_MODEL);
   const [chatId] = useState(() => generateUUID());
+  const [isAuthenticating, setIsAuthenticating] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    // Check if user is authenticated by checking for session
+    const checkAuth = async () => {
+      try {
+        const response = await fetch("/api/auth/session");
+        const session = await response.json();
+
+        if (session?.user) {
+          // User is authenticated
+          setIsAuthenticating(false);
+        } else {
+          // Redirect to guest login if not authenticated
+          router.push(`/api/auth/guest?redirectUrl=${encodeURIComponent("/chat")}`);
+        }
+      } catch (error) {
+        console.error("[ChatPage] Auth check failed:", error);
+        // Try guest login on error
+        router.push(`/api/auth/guest?redirectUrl=${encodeURIComponent("/chat")}`);
+      }
+    };
+
+    checkAuth();
+  }, [router]);
+
+  // Show loading state while authenticating
+  if (isAuthenticating) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+        <div className="text-center">
+          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-blue-600 border-b-2" />
+          <p className="text-gray-600 dark:text-gray-400">Initializing chat...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <DataStreamProvider>
