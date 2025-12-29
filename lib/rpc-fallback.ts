@@ -16,18 +16,8 @@ export function createRetryTransport(url: string, options?: { retries?: number; 
   return http(url, {
     timeout,
     retryCount: retries,
-    retryDelay: ({ count }) => {
-      // Exponential backoff: 1s, 2s, 4s
-      return Math.min(1000 * Math.pow(2, count), 4000);
-    },
-    onFetchRequest: (request) => {
-      console.log(`[RPC] Request to ${url}:`, request.method);
-    },
-    onFetchResponse: (response) => {
-      if (!response.ok) {
-        console.warn(`[RPC] Response ${response.status} from ${url}`);
-      }
-    },
+    // Simple retry delay (viem will handle exponential backoff automatically)
+    retryDelay: 1000,
   });
 }
 
