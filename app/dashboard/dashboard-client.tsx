@@ -113,7 +113,7 @@ export default function DashboardPage() {
               AI Memory Box
             </Link>
             <Link
-              className="text-blue-600 text-sm hover:underline dark:text-blue-400"
+              className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-blue-700"
               href="/chat"
             >
               Go to Chat
