@@ -29,7 +29,7 @@ export const autonomysAutoEVM = defineChain({
     default: {
       http: [
         isTestnet
-          ? "https://rpc-0.chronos.autonomys.xyz"
+          ? "https://auto-evm.chronos.autonomys.xyz/ws"
           : "https://auto-evm.mainnet.autonomys.xyz",
       ],
       webSocket: [
