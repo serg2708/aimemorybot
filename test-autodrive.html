@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AutoDrive Test</title>
+</head>
+<body>
+    <h1>AutoDrive Direct Test</h1>
+    <div id="status">Testing...</div>
+    <div id="result"></div>
+    
+    <script type="module">
+        const apiKey = "eb9021c5213a461ab2a6061332485dc3";
+        const statusDiv = document.getElementById('status');
+        const resultDiv = document.getElementById('result');
+        
+        statusDiv.textContent = "Loading AutoDrive module...";
+        
+        try {
+            // Try to import the package
+            const autoDriveModule = await import('https://cdn.skypack.dev/@autonomys/auto-drive@1.6.0');
+            statusDiv.textContent = "Module loaded! Keys: " + Object.keys(autoDriveModule).join(', ');
+            
+            if (autoDriveModule.createAutoDriveApi) {
+                statusDiv.textContent += "\n\nInitializing API...";
+                const api = autoDriveModule.createAutoDriveApi({
+                    apiKey: apiKey,
+                    network: 'mainnet'
+                });
+                statusDiv.textContent += "\n\nAPI initialized successfully!";
+                resultDiv.innerHTML = "<pre>" + JSON.stringify(api, null, 2) + "</pre>";
+            } else {
+                statusDiv.textContent = "ERROR: createAutoDriveApi not found";
+            }
+        } catch (error) {
+            statusDiv.textContent = "ERROR: " + error.message;
+            resultDiv.innerHTML = "<pre>" + error.stack + "</pre>";
+        }
+    </script>
+</body>
+</html>
