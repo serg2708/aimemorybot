@@ -21,7 +21,7 @@ export function NetworkStatus() {
 
   const tokenAddress = chain?.id ? getAI3TokenAddress(chain.id) : undefined;
 
-  const { data: balance, isLoading } = useBalance({
+  const { data: balance, isLoading, isError } = useBalance({
     address,
     token: tokenAddress as `0x${string}`,
     query: {
@@ -62,6 +62,10 @@ export function NetworkStatus() {
 
         {isLoading && <span className="text-gray-500 text-xs">Loading...</span>}
 
+        {!isLoading && !balance && isError && (
+          <span className="text-gray-500 text-xs">Balance unavailable</span>
+        )}
+
         {/* Dropdown arrow */}
         <svg
           className={`h-4 w-4 transition-transform ${isExpanded ? "rotate-180" : ""}`}
@@ -101,6 +105,13 @@ export function NetworkStatus() {
               {balance ? (
                 <div className="font-bold text-blue-600 text-lg dark:text-blue-400">
                   {Number.parseFloat(balance.formatted).toFixed(4)} {tokenName}
+                </div>
+              ) : isError ? (
+                <div className="text-gray-500 text-sm">
+                  <div>Not available</div>
+                  <div className="mt-1 text-xs opacity-75">
+                    RPC endpoint issue
+                  </div>
                 </div>
               ) : (
                 <div className="text-gray-500 text-sm">Not available</div>
