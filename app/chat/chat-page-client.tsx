@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { DataStreamHandler } from "@/components/data-stream-handler";
 import { DataStreamProvider } from "@/components/data-stream-provider";
+import { Footer } from "@/components/footer";
 import { WalletConnect } from "@/components/wallet-connect";
 import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
 import { generateUUID } from "@/lib/utils";
@@ -101,6 +102,8 @@ export default function ChatPageClient() {
             <SimpleChatInterface chatId={chatId} initialChatModel={chatModel} />
           </div>
         </div>
+
+        <Footer />
 
         <DataStreamHandler />
       </div>

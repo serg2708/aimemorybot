@@ -6,6 +6,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Footer } from "@/components/footer";
 import { SubscriptionCard } from "@/components/subscription-badge";
 import { WalletConnect } from "@/components/wallet-connect";
 import { useAccount } from "@/hooks/use-web3-safe";
@@ -361,6 +362,8 @@ export default function PricingPage() {
           </details>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 }

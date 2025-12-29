@@ -6,6 +6,7 @@
 "use client";
 
 import Link from "next/link";
+import { Footer } from "@/components/footer";
 import { WalletConnect } from "@/components/wallet-connect";
 import { useAccount } from "@/hooks/use-web3-safe";
 
@@ -189,23 +190,7 @@ export default function HomePage() {
         </Link>
       </div>
 
-      {/* Footer */}
-      <div className="container mx-auto border-gray-200 border-t px-4 py-8 dark:border-gray-700">
-        <div className="flex items-center justify-between text-gray-600 text-sm dark:text-gray-400">
-          <div>© 2024 AI Memory Box. All rights reserved.</div>
-          <div className="flex gap-6">
-            <Link className="hover:underline" href="/pricing">
-              Pricing
-            </Link>
-            <Link className="hover:underline" href="/dashboard">
-              Dashboard
-            </Link>
-            <Link className="hover:underline" href="/chat">
-              Chat
-            </Link>
-          </div>
-        </div>
-      </div>
+      <Footer />
     </div>
   );
 }

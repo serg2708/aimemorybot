@@ -8,6 +8,7 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Footer } from "@/components/footer";
 import { NetworkStatus } from "@/components/network-status";
 import { SubscriptionCard } from "@/components/subscription-badge";
 import { WalletConnect } from "@/components/wallet-connect";
@@ -386,6 +387,8 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
+        <Footer />
       </div>
     </div>
   );
