@@ -7,11 +7,7 @@
 
 import { useState } from "react";
 import { useAccount, useBalance, useSwitchChain } from "wagmi";
-import {
-  autonomysAutoEVM,
-  getAI3TokenAddress,
-  getAI3TokenName,
-} from "@/lib/web3";
+import { autonomysAutoEVM, getAI3TokenName } from "@/lib/web3";
 import { Button } from "./ui/button";
 
 export function NetworkStatus() {
@@ -19,13 +15,12 @@ export function NetworkStatus() {
   const { chains, switchChain } = useSwitchChain();
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const tokenAddress = chain?.id ? getAI3TokenAddress(chain.id) : undefined;
-
+  // AI3/tAI3 is a native token (like ETH), not an ERC20 token
+  // So we don't need to specify a token address
   const { data: balance, isLoading, isError } = useBalance({
     address,
-    token: tokenAddress as `0x${string}`,
     query: {
-      enabled: !!address && !!tokenAddress,
+      enabled: !!address,
     },
   });
 
