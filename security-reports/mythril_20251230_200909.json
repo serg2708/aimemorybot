@@ -1,0 +1,9 @@
+NOTE: Mythril requires Docker with proper permissions.
+To use Mythril with Docker, run:
+  sudo usermod -aG docker ser
+  newgrp docker  # or logout and login
+
+Then Mythril can be used via:
+  docker run -v $(pwd):/src mythril/myth [options]
+
+For now, you can use Slither for static analysis (already installed).
