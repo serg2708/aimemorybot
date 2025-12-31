@@ -73,8 +73,8 @@ contract SubscriptionSecure is Ownable2Step, ReentrancyGuard, Pausable {
     /**
      * @notice Constructor - sets the contract owner
      */
-    constructor() {
-        // Owner is set by Ownable constructor automatically
+    constructor() Ownable(msg.sender) {
+        // Owner is set by Ownable(msg.sender) constructor
     }
 
     /**
